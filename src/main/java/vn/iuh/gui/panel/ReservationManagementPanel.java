@@ -1,17 +1,12 @@
-package gui.panel;
+package vn.iuh.gui.panel;
 
-import com.formdev.flatlaf.FlatClientProperties;
-import com.formdev.flatlaf.ui.FlatBorder;
-import gui.base.CustomUI;
-import gui.base.GridRoomPanel;
-import gui.base.RoomItem;
+import vn.iuh.gui.base.CustomUI;
+import vn.iuh.gui.base.GridRoomPanel;
+import vn.iuh.gui.base.RoomItem;
 
-import javax.sound.sampled.Line;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.geom.RoundRectangle2D;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ReservationManagementPanel extends JPanel {
