@@ -1,8 +1,10 @@
-package gui.base;
-import java.awt.Component;
+package vn.iuh.gui.base;
+
 import net.miginfocom.swing.MigLayout;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTargetAdapter;
+
+import java.awt.*;
 
 public class MenuAnimation {
     public static void showMenu(Component component, MenuItem item, MigLayout layout, boolean show) {

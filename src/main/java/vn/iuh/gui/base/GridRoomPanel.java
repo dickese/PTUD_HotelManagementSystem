@@ -1,9 +1,6 @@
-package gui.base;
-
-import net.miginfocom.swing.MigLayout;
+package vn.iuh.gui.base;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.util.List;
 

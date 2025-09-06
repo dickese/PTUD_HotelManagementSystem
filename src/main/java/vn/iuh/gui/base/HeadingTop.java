@@ -1,4 +1,4 @@
-package gui.base;
+package vn.iuh.gui.base;
 
 import javax.swing.*;
 import java.awt.*;

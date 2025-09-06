@@ -5,18 +5,18 @@ import java.sql.Time;
 public class RoomListPrice {
     private String id;
     private Time createAt;
-    private Double previousDailyPrice;
-    private Double previousHourlyPrice;
-    private Double updatedDailyPrice;
-    private Double updatedHourlyPrice;
+    private double previousDailyPrice;
+    private double previousHourlyPrice;
+    private double updatedDailyPrice;
+    private double updatedHourlyPrice;
     private String roomCategoryId;
     private String shiftAssignmentId;
 
     public RoomListPrice() {
     }
 
-    public RoomListPrice(String id, Time createAt, Double previousDailyPrice, Double previousHourlyPrice,
-                         Double updatedDailyPrice, Double updatedHourlyPrice, String roomCategoryId,
+    public RoomListPrice(String id, Time createAt, double previousDailyPrice, double previousHourlyPrice,
+                         double updatedDailyPrice, double updatedHourlyPrice, String roomCategoryId,
                          String shiftAssignmentId) {
         this.id = id;
         this.createAt = createAt;
@@ -45,35 +45,35 @@ public class RoomListPrice {
         this.createAt = createAt;
     }
 
-    public Double getPreviousDailyPrice() {
+    public double getPreviousDailyPrice() {
         return previousDailyPrice;
     }
 
-    public void setPreviousDailyPrice(Double previousDailyPrice) {
+    public void setPreviousDailyPrice(double previousDailyPrice) {
         this.previousDailyPrice = previousDailyPrice;
     }
 
-    public Double getPreviousHourlyPrice() {
+    public double getPreviousHourlyPrice() {
         return previousHourlyPrice;
     }
 
-    public void setPreviousHourlyPrice(Double previousHourlyPrice) {
+    public void setPreviousHourlyPrice(double previousHourlyPrice) {
         this.previousHourlyPrice = previousHourlyPrice;
     }
 
-    public Double getUpdatedDailyPrice() {
+    public double getUpdatedDailyPrice() {
         return updatedDailyPrice;
     }
 
-    public void setUpdatedDailyPrice(Double updatedDailyPrice) {
+    public void setUpdatedDailyPrice(double updatedDailyPrice) {
         this.updatedDailyPrice = updatedDailyPrice;
     }
 
-    public Double getUpdatedHourlyPrice() {
+    public double getUpdatedHourlyPrice() {
         return updatedHourlyPrice;
     }
 
-    public void setUpdatedHourlyPrice(Double updatedHourlyPrice) {
+    public void setUpdatedHourlyPrice(double updatedHourlyPrice) {
         this.updatedHourlyPrice = updatedHourlyPrice;
     }
 
