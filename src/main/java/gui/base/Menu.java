@@ -1,4 +1,4 @@
-package gui;
+package gui.base;
 
 import net.miginfocom.swing.MigLayout;
 

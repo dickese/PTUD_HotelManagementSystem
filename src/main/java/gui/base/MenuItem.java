@@ -1,11 +1,8 @@
-package gui;
+package gui.base;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.geom.Path2D;
 
 public class MenuItem extends JButton{
     private int index;
@@ -96,8 +93,6 @@ public class MenuItem extends JButton{
                 g2.drawLine(18, getHeight() / 2, 26, getHeight() / 2);
             }
         }
-
-
         g2.dispose();
     }
 

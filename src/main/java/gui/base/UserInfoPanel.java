@@ -1,8 +1,7 @@
-package gui;
+package gui.base;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 
 public class UserInfoPanel extends JPanel {
 

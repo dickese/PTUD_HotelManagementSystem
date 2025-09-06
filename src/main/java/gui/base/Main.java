@@ -3,24 +3,12 @@
 // (powered by FernFlower decompiler)
 //
 
-package gui;
+package gui.base;
 
-import com.formdev.flatlaf.FlatDarculaLaf;
-import com.formdev.flatlaf.FlatDarkLaf;
-import com.formdev.flatlaf.FlatIntelliJLaf;
-import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
-import net.miginfocom.layout.AlignX;
-import net.miginfocom.swing.MigLayout;
+import gui.panel.ReservationManagementPanel;
 
 import java.awt.*;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.chrono.ChronoLocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 import javax.swing.*;
 
 public class Main extends JFrame {
@@ -28,9 +16,6 @@ public class Main extends JFrame {
     private Menu cmpMenu;
     private JScrollPane scrollPanel;
     private JPanel cmpTopHeading;
-    private JLabel countingLabel;
-    private JPanel pnlCounting;
-    private JLabel lblCountingDay;
     private JPanel pnlLeftWrapper;
     private JPanel pnlTopWrapper;
     private JPanel pnlLeftTopWrapper;
@@ -67,7 +52,6 @@ public class Main extends JFrame {
         pnlCenter = new JPanel(mainLayout);
         pnlCenter.setBorder(BorderFactory.createEmptyBorder(5, 5, 5,5));
         this.pMain.add(pnlCenter, BorderLayout.CENTER);
-
     }
 
     private void createASideBar() {
@@ -126,8 +110,10 @@ public class Main extends JFrame {
         pink.setBackground(Color.cyan);
         JPanel blue = new JPanel();
         blue.setBackground(Color.blue);
+        ReservationManagementPanel tmp = new ReservationManagementPanel();
         pnlCenter.add(pink, "dsadsa");
         pnlCenter.add(blue, "Inbox");
+        pnlCenter.add(tmp, "Read");
     }
 
 }

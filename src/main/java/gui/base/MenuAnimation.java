@@ -1,4 +1,4 @@
-package gui;
+package gui.base;
 import java.awt.Component;
 import net.miginfocom.swing.MigLayout;
 import org.jdesktop.animation.timing.Animator;
