@@ -4,9 +4,16 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.Date;
 
 public class RoomItem extends JPanel {
-
+//    private String id;
+//    private String roomName;
+//    private String roomStatus;
+//    private Date createDate;
+//    private String note;
+//    private String roomDescription;
+//    private String roomCategoryId;
 
     private void init(){
         this.addMouseListener(new MouseAdapter() {
@@ -18,14 +25,14 @@ public class RoomItem extends JPanel {
     }
 
 
-    public RoomItem(String roomNumber, String status, String type, String customer, String time, Color bg) {
+    public RoomItem(String roomID, String status, String type, String customer, String time, Color bg) {
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(0, 100));
 //        setBackground(bg);
         setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
 
         // Phần tiêu đề (số phòng)
-        JLabel lblRoom = new JLabel("Phòng " + roomNumber);
+        JLabel lblRoom = new JLabel("Phòng " + roomID);
         lblRoom.setFont(new Font("Arial", Font.BOLD, 16));
         lblRoom.setForeground(Color.WHITE);
 
