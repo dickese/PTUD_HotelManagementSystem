@@ -48,35 +48,35 @@ public class ReservationManagementPanel extends JPanel {
     }
 
     private void createCenterPanel(){
-        List<RoomItem> roomItems = List.of(
-                new RoomItem("101", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-                new RoomItem("102", "Trống", "Phòng VIP Giường Đôi", null, null, new Color(100, 200, 100)),
-                new RoomItem("105", "Đang thuê", "Phòng Thường Giường Đơn", "Lê Thị B", "02-12-2024 12:18", new Color(80, 170, 250)),
-                new RoomItem("109", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-                new RoomItem("203", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-                new RoomItem("101", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-                new RoomItem("102", "Trống", "Phòng VIP Giường Đôi", null, null, new Color(100, 200, 100)),
-                new RoomItem("105", "Đang thuê", "Phòng Thường Giường Đơn", "Lê Thị B", "02-12-2024 12:18", new Color(80, 170, 250)),
-                new RoomItem("109", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-                new RoomItem("203", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-                new RoomItem("101", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-                new RoomItem("102", "Trống", "Phòng VIP Giường Đôi", null, null, new Color(100, 200, 100)),
-                new RoomItem("105", "Đang thuê", "Phòng Thường Giường Đơn", "Lê Thị B", "02-12-2024 12:18", new Color(80, 170, 250)),
-                new RoomItem("109", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-                new RoomItem("203", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-                new RoomItem("101", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-                new RoomItem("102", "Trống", "Phòng VIP Giường Đôi", null, null, new Color(100, 200, 100)),
-                new RoomItem("105", "Đang thuê", "Phòng Thường Giường Đơn", "Lê Thị B", "02-12-2024 12:18", new Color(80, 170, 250)),
-                new RoomItem("109", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-                new RoomItem("203", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100))
-        );
+//        List<RoomItem> roomItems = List.of(
+//                new RoomItem("101", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
+//                new RoomItem("102", "Trống", "Phòng VIP Giường Đôi", null, null, new Color(100, 200, 100)),
+//                new RoomItem("105", "Đang thuê", "Phòng Thường Giường Đơn", "Lê Thị B", "02-12-2024 12:18", new Color(80, 170, 250)),
+//                new RoomItem("109", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
+//                new RoomItem("203", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
+//                new RoomItem("101", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
+//                new RoomItem("102", "Trống", "Phòng VIP Giường Đôi", null, null, new Color(100, 200, 100)),
+//                new RoomItem("105", "Đang thuê", "Phòng Thường Giường Đơn", "Lê Thị B", "02-12-2024 12:18", new Color(80, 170, 250)),
+//                new RoomItem("109", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
+//                new RoomItem("203", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
+//                new RoomItem("101", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
+//                new RoomItem("102", "Trống", "Phòng VIP Giường Đôi", null, null, new Color(100, 200, 100)),
+//                new RoomItem("105", "Đang thuê", "Phòng Thường Giường Đơn", "Lê Thị B", "02-12-2024 12:18", new Color(80, 170, 250)),
+//                new RoomItem("109", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
+//                new RoomItem("203", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
+//                new RoomItem("101", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
+//                new RoomItem("102", "Trống", "Phòng VIP Giường Đôi", null, null, new Color(100, 200, 100)),
+//                new RoomItem("105", "Đang thuê", "Phòng Thường Giường Đơn", "Lê Thị B", "02-12-2024 12:18", new Color(80, 170, 250)),
+//                new RoomItem("109", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
+//                new RoomItem("203", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100))
+//        );
 
-//        List<RoomItem> roomItems = new ArrayList<>();
-//
-//        List<BookingResponse> bookingResponses = bookingService.getAllBookingInfo();
-//        for (BookingResponse bookingResponse : bookingResponses) {
-//            roomItems.add(new RoomItem(bookingResponse));
-//        }
+        List<RoomItem> roomItems = new ArrayList<>();
+
+        List<BookingResponse> bookingResponses = bookingService.getAllBookingInfo();
+        for (BookingResponse bookingResponse : bookingResponses) {
+            roomItems.add(new RoomItem(bookingResponse));
+        }
 
         gridRoomPanels = new GridRoomPanel(roomItems);
         scrollPane = new JScrollPane(gridRoomPanels,

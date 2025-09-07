@@ -27,6 +27,22 @@ public class BookingResponse {
     }
 
     @Override
+    public String toString() {
+        return "BookingResponse{" +
+               "roomId='" + roomId + '\'' +
+               ", roomName='" + roomName + '\'' +
+               ", roomStatus='" + roomStatus + '\'' +
+               ", roomType='" + roomType + '\'' +
+               ", numberOfCustomers='" + numberOfCustomers + '\'' +
+               ", dailyPrice=" + dailyPrice +
+               ", hourlyPrice=" + hourlyPrice +
+               ", customerName='" + customerName + '\'' +
+               ", timeIn=" + timeIn +
+               ", timeOut=" + timeOut +
+               '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o instanceof String) {

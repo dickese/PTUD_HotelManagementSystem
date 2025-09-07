@@ -32,7 +32,10 @@ public class BookingServiceImpl implements BookingService {
         List<BookingResponse> bookingResponses = new ArrayList<>();
         for (RoomInfo roomInfo : roomInfos) {
             if (Objects.equals(roomInfo.getRoomStatus(), RoomStatus.ROOM_BOOKED_STATUS.getStatus()) ||
-                Objects.equals(roomInfo.getRoomStatus(), RoomStatus.ROOM_USING_STATUS.getStatus())) {
+                Objects.equals(roomInfo.getRoomStatus(), RoomStatus.ROOM_CHECKING_STATUS.getStatus()) ||
+                Objects.equals(roomInfo.getRoomStatus(), RoomStatus.ROOM_USING_STATUS.getStatus()) ||
+                Objects.equals(roomInfo.getRoomStatus(), RoomStatus.ROOM_CHECKOUT_LATE_STATUS.getStatus())
+            ) {
 
                 nonAvailableRoomIds.add(roomInfo.getId());
             }
@@ -45,13 +48,14 @@ public class BookingServiceImpl implements BookingService {
 
         // Update BookingResponse with Booking Info
         for (BookingInfo bookingInfo : bookingInfos) {
-            BookingResponse bookingResponse = bookingResponses.get(bookingResponses.indexOf(bookingInfo.getRoomId()));
-            if (bookingResponse != null) {
-                bookingResponse.updateBookingInfo(
-                        bookingInfo.getCustomerName(),
-                        bookingInfo.getTimeIn(),
-                        bookingInfo.getTimeOut()
-                );
+            for (BookingResponse bookingResponse : bookingResponses) {
+                if (Objects.equals(bookingResponse.getRoomId(), bookingInfo.getRoomId())) {
+                    bookingResponse.updateBookingInfo(
+                            bookingInfo.getCustomerName(),
+                            bookingInfo.getTimeIn(),
+                            bookingInfo.getTimeOut()
+                    );
+                }
             }
         }
 

@@ -25,6 +25,7 @@ public class RoomItem extends JPanel {
 
         // Phần tiêu đề số phòng + sức chứa
         JPanel header = new JPanel(new GridLayout(1, 2, 20, 0));
+        header.setOpaque(false);
 
         JLabel lblRoomName = new JLabel("Phòng " + bookingResponse.getRoomName());
         lblRoomName.setFont(new Font("Arial", Font.BOLD, 16));
@@ -54,11 +55,10 @@ public class RoomItem extends JPanel {
 
         // Phần bottom dựa trên trạng thái phòng
         JPanel bottom = new JPanel(new GridLayout(3, 1));
+        bottom.setOpaque(false);
 
         switch (bookingResponse.getRoomStatus()) {
             case "Còn trống" -> {
-                bottom.setOpaque(false);
-
                 JLabel lblHourlyPrice = new JLabel("Giá theo giờ: " + bookingResponse.getHourlyPrice());
                 lblHourlyPrice.setFont(new Font("Arial", Font.PLAIN, 14));
                 lblHourlyPrice.setForeground(Color.WHITE);
@@ -73,7 +73,7 @@ public class RoomItem extends JPanel {
                 setBackground(CustomUI.lightGreen);
             }
             case "Đang kiểm tra", "Đang sử dụng", "Đặt trước" -> {
-                JLabel lblCustomer = new JLabel(bookingResponse.getCustomerName(), SwingConstants.CENTER);
+                JLabel lblCustomer = new JLabel("Tên KH: " + bookingResponse.getCustomerName());
                 lblCustomer.setFont(new Font("Arial", Font.BOLD, 16));
                 lblCustomer.setForeground(Color.WHITE);
 
@@ -89,6 +89,25 @@ public class RoomItem extends JPanel {
                 bottom.add(lblTimeIn);
                 bottom.add(lblTimeOut);
                 setBackground(CustomUI.lightBlue);
+            }
+
+            case "Trả phòng trễ" -> {
+                JLabel lblCustomer = new JLabel(bookingResponse.getCustomerName(), SwingConstants.CENTER);
+                lblCustomer.setFont(new Font("Arial", Font.BOLD, 16));
+                lblCustomer.setForeground(Color.WHITE);
+
+                JLabel lblTimeIn = new JLabel("Checkin: " + bookingResponse.getTimeIn());
+                lblTimeIn.setFont(new Font("Arial", Font.PLAIN, 14));
+                lblTimeIn.setForeground(Color.WHITE);
+
+                JLabel lblTimeOut = new JLabel("Checkout: " + bookingResponse.getTimeIn());
+                lblTimeOut.setFont(new Font("Arial", Font.PLAIN, 14));
+                lblTimeOut.setForeground(Color.WHITE);
+
+                bottom.add(lblCustomer);
+                bottom.add(lblTimeIn);
+                bottom.add(lblTimeOut);
+                setBackground(CustomUI.red);
             }
             default -> {
                 bottom.setOpaque(false);

@@ -15,6 +15,16 @@ public class BookingInfo {
         this.timeOut = timeOut;
     }
 
+    @Override
+    public String toString() {
+        return "BookingInfo{" +
+               "roomId='" + roomId + '\'' +
+               ", customerName='" + customerName + '\'' +
+               ", timeIn=" + timeIn +
+               ", timeOut=" + timeOut +
+               '}';
+    }
+
     public String getRoomId() {
         return roomId;
     }

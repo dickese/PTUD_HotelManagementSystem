@@ -49,11 +49,11 @@ public class BookingDAO {
             return new ArrayList<>();
 
         StringBuilder query = new StringBuilder(
-                "SELECT r.id, c.full_name, rrd.time_in, rrd.time_out" +
+                "SELECT r.id, c.customer_name, rrd.time_in, rrd.time_out" +
                 " FROM Room r" +
                 " JOIN RoomReservationDetail rrd ON r.id = rrd.room_id" +
-                " JOIN Reservation res ON res.id = rrd.reservation_id" +
-                " JOIN Customer c ON c.id = res.customer_id" +
+                " JOIN ReservationForm rf ON rf.id = rrd.reservation_form_id" +
+                " JOIN Customer c ON c.id = rf.customer_id" +
                 " WHERE r.id IN (");
 
         for (int i = 0; i < nonAvailableRoomIds.size(); i++) {
@@ -62,8 +62,7 @@ public class BookingDAO {
                 query.append(", ");
             }
         }
-
-        query.append("\")");
+        query.append(")");
 
         List<BookingInfo> bookings = new ArrayList<>();
         try {
@@ -74,6 +73,7 @@ public class BookingDAO {
             }
 
             var rs = ps.executeQuery();
+
             while (rs.next())
                 bookings.add(mapResultSetToBookingInfo(rs));
 
@@ -105,7 +105,7 @@ public class BookingDAO {
     private BookingInfo mapResultSetToBookingInfo(ResultSet rs) throws SQLException {
         return new BookingInfo(
                 rs.getString("id"),
-                rs.getString("full_name"),
+                rs.getString("customer_name"),
                 rs.getDate("time_in"),
                 rs.getDate("time_out")
         );
