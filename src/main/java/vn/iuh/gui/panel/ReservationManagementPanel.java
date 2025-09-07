@@ -1,16 +1,18 @@
 package vn.iuh.gui.panel;
 
-import vn.iuh.dao.RoomDAO;
+import vn.iuh.dto.response.BookingResponse;
 import vn.iuh.entity.Room;
 import vn.iuh.gui.base.CustomUI;
 import vn.iuh.gui.base.GridRoomPanel;
 import vn.iuh.gui.base.RoomItem;
-import vn.iuh.servcie.RoomService;
+import vn.iuh.servcie.BookingService;
+import vn.iuh.servcie.impl.BookingServiceImpl;
 import vn.iuh.servcie.impl.RoomServiceImpl;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ReservationManagementPanel extends JPanel {
@@ -19,10 +21,10 @@ public class ReservationManagementPanel extends JPanel {
     private JPanel pnlTop;
     private JScrollPane scrollPane;
 
-    private RoomService roomService;
+    private BookingService bookingService;
 
     public ReservationManagementPanel() {
-        roomService = new RoomServiceImpl();
+        bookingService = new BookingServiceImpl();
 
         setBorder(new LineBorder(Color.LIGHT_GRAY, 2));
         setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
@@ -46,7 +48,7 @@ public class ReservationManagementPanel extends JPanel {
     }
 
     private void createCenterPanel(){
-        List<RoomItem> rooms = List.of(
+        List<RoomItem> roomItems = List.of(
                 new RoomItem("101", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
                 new RoomItem("102", "Trống", "Phòng VIP Giường Đôi", null, null, new Color(100, 200, 100)),
                 new RoomItem("105", "Đang thuê", "Phòng Thường Giường Đơn", "Lê Thị B", "02-12-2024 12:18", new Color(80, 170, 250)),
@@ -69,11 +71,14 @@ public class ReservationManagementPanel extends JPanel {
                 new RoomItem("203", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100))
         );
 
-        List<Room> test = roomService.getAll();
-//        List<RoomItem> roomItems = mapRoomsToRoomItems(rooms);
-//        gridRoomPanels = new GridRoomPanel(roomItems);
+//        List<RoomItem> roomItems = new ArrayList<>();
+//
+//        List<BookingResponse> bookingResponses = bookingService.getAllBookingInfo();
+//        for (BookingResponse bookingResponse : bookingResponses) {
+//            roomItems.add(new RoomItem(bookingResponse));
+//        }
 
-        gridRoomPanels = new GridRoomPanel(rooms);
+        gridRoomPanels = new GridRoomPanel(roomItems);
         scrollPane = new JScrollPane(gridRoomPanels,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -82,25 +87,18 @@ public class ReservationManagementPanel extends JPanel {
         add(scrollPane);
     }
 
-    private List<RoomItem> mapRoomsToRoomItems(List<Room> rooms) {
-        List<RoomItem> roomItems = new java.util.ArrayList<>();
-        for (Room room : rooms) {
-            String status = room.getRoomStatus().equals("available") ? "Trống" : "Đang thuê";
-            String type = room.getRoomCategoryId(); // Giả sử bạn có phương thức để lấy tên loại phòng từ ID
-            String customer = null; // Lấy tên khách nếu có
-            String time = null; // Lấy thời gian đặt phòng nếu có
-            Color bg = room.getRoomStatus().equals("available") ? new Color(100, 200, 100) : new Color(80, 170, 250);
-
-            RoomItem roomItem = new RoomItem(
-                    room.getRoomName(),
-                    status,
-                    type,
-                    customer,
-                    time,
-                    bg
-            );
-            roomItems.add(roomItem);
-        }
-        return roomItems;
-    }
+//    private RoomItem mapBookingResponseToRoomItem(BookingResponse bookingResponse){
+//        String roomName = bookingResponse.getRoomName();
+//        String status = bookingResponse.getBookingStatus();
+//        String type = bookingResponse.getRoomCategoryName();
+//        String customer = bookingResponse.getCustomerName();
+//        String time = bookingResponse.getCheckInTime();
+//        Color bg;
+//        if(customer == null){
+//            bg = CustomUI.lightGreen;
+//        } else {
+//            bg = CustomUI.lightBlue;
+//        }
+//        return new RoomItem(roomName, status, type, customer, time, bg);
+//    }
 }

@@ -10,5 +10,6 @@ public class CustomUI {
     public static final Color darkGreen = new Color(80, 135, 80);
     public static final Color red = new Color(220, 35, 35);
     public static final Color purple = new Color(136, 40, 225);
+    public static final Color gray = new Color(200, 200, 200);
 
 }
