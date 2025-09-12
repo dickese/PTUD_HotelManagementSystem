@@ -2,15 +2,14 @@ package vn.iuh.gui.panel;
 
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+import com.formdev.flatlaf.FlatClientProperties;
 import vn.iuh.dto.response.BookingResponse;
-import vn.iuh.entity.Room;
 import vn.iuh.gui.base.CustomUI;
 import vn.iuh.gui.base.GridRoomPanel;
 import vn.iuh.gui.base.RoomItem;
 import vn.iuh.schedule.RoomStatusHandler;
 import vn.iuh.servcie.BookingService;
 import vn.iuh.servcie.impl.BookingServiceImpl;
-import vn.iuh.servcie.impl.RoomServiceImpl;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -28,9 +27,6 @@ public class ReservationManagementPanel extends JPanel {
 
     public ReservationManagementPanel() {
         bookingService = new BookingServiceImpl();
-
-
-        setBorder(new LineBorder(Color.LIGHT_GRAY, 2));
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         init();
     }
@@ -48,6 +44,7 @@ public class ReservationManagementPanel extends JPanel {
         pnlTop.setBackground(CustomUI.lightBlue);
         pnlTop.add(lblTop);
         pnlTop.setPreferredSize(new Dimension(0, 50));
+        pnlTop.putClientProperty(FlatClientProperties.STYLE, " arc: 10");
         add(pnlTop);
     }
 

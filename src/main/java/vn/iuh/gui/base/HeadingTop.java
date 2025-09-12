@@ -11,12 +11,12 @@ public class HeadingTop extends JPanel {
     private final JLabel countingLabel;
 
     public HeadingTop() {
-//        setOpaque(false);
-        setBackground(new Color(50, 100, 155));
-        setPreferredSize(new Dimension(0, 50));
+        setBackground(CustomUI.darkBlue);
         pnlCounting = new JPanel();
         countingLabel = new JLabel();
-        countingLabel.setForeground(Color.cyan);
+        countingLabel.setForeground(CustomUI.white);
+        countingLabel.setFont(CustomUI.normalFont);
+
 
         SimpleDateFormat countingSecondSdf = new SimpleDateFormat("HH:mm:ss");
         countingSecondSdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
@@ -29,6 +29,7 @@ public class HeadingTop extends JPanel {
         updateSecondTimer.start();
         pnlCounting.setOpaque(false);
         pnlCounting.add(countingLabel);
+        add(Box.createHorizontalStrut(50));
         add(pnlCounting);
     }
 

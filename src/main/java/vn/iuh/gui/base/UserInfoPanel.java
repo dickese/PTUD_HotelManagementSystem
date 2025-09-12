@@ -4,7 +4,6 @@ import javax.swing.*;
 import java.awt.*;
 
 public class UserInfoPanel extends JPanel {
-
     private JLabel lblAvatar;
     private JLabel lblRole;
     private JLabel lblName;
@@ -47,7 +46,7 @@ public class UserInfoPanel extends JPanel {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         g2.setColor(new Color(50, 100, 155));
-        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
 
         g2.dispose();
     }
