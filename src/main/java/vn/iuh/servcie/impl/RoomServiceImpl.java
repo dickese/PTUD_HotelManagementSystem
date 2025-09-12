@@ -6,6 +6,7 @@ import vn.iuh.dto.event.create.RoomCreationEvent;
 import vn.iuh.dto.event.update.RoomModificationEvent;
 import vn.iuh.entity.Room;
 import vn.iuh.servcie.RoomService;
+import vn.iuh.util.EntityUtil;
 
 import java.sql.Date;
 import java.util.List;
@@ -46,7 +47,10 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public Room createRoom(RoomCreationEvent room) {
         Room lastedRoom = roomDAO.findLastRoom();
-        String newID = increaseRoomID(lastedRoom.getId());
+        String newID = EntityUtil.increaseEntityID(
+                lastedRoom.getId(),
+                EntityIDSymbol.ROOM_PREFIX.getPrefix(),
+                EntityIDSymbol.ROOM_PREFIX.getLength());
 
         Room newRoom = new Room(
                 newID,
@@ -81,14 +85,5 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public boolean deleteRoomByID(String roomID) {
         return roomDAO.deleteRoomByID(roomID);
-    }
-
-    private String increaseRoomID(String roomID) {
-        String[] strings = roomID.split(EntityIDSymbol.ROOM_PREFIX.getPrefix());
-        int id = Integer.parseInt(strings[1]);
-        id++;
-
-        String format = "%0" + EntityIDSymbol.ROOM_PREFIX.getLength() + "d";
-        return "RO" + String.format(format, id);
     }
 }
