@@ -12,15 +12,12 @@ public class Menu extends JComponent {
 
     private MigLayout migLayout;
     private String[][] menuItems = new String[][]{
-            {
-                "Dashboard", "dsadsa", "cdxcd"
-            },
-            {"Email", "Inbox", "Read"},
-            {"Email", "Inbox", "Read"},
-            {"Email", "Inbox", "Read"},
-            {"Email", "Inbox", "Read"},
-            {"Email", "Inbox", "Read"},
-            {"Email", "Inbox", "Read"}
+            {"Đặt phòng", "Quản lý đặt phòng", "Quản lý lưu trú"},
+            {"Phòng", "Quản lý phòng", "Quản lý loại phòng", },
+            {"Dịch vụ", "Tìm kiếm dịch vụ","Quản lý dịch vụ", "Quản lý loại dịch vụ"},
+            {"Thống kê", "Thống kê doanh thu", "Quản lý hóa đơn"},
+            {"Nhân viên", "Quản lý nhân viên", "Quản lý tài khoản", "Quản lý hoạt động"},
+            {"Thiết lập nghiệp vụ", "Quản lý phụ phí", "Quản lý nghiệp vụ"}
     };
         public Menu(Main mainFrame) {
         init(mainFrame);
@@ -33,6 +30,7 @@ public class Menu extends JComponent {
         for(int i = 0 ; i < menuItems.length; i++){
             addMenu(menuItems[i][0], i, mainFrame);
         }
+        setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
     private void addMenu(String menuName, int index, Main mainFrame){
@@ -91,7 +89,7 @@ public class Menu extends JComponent {
         Graphics2D g2 = (Graphics2D) grphcs.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setColor(new Color(50, 100, 155));
-        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
         g2.dispose();
         super.paintComponent(grphcs);
     }

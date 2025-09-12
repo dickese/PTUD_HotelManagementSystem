@@ -7,6 +7,7 @@ package vn.iuh.gui.base;
 
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import vn.iuh.gui.panel.ReservationManagementPanel;
+import vn.iuh.gui.panel.statistic.RevenueStatisticPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,6 +23,11 @@ public class Main extends JFrame {
     private CardLayout mainLayout;
     private JPanel pnlCenter;
     private UserInfoPanel userInfo;
+    private JPanel pnlTop;
+    private JLabel lblSystemName;
+    private JButton btnLogOut;
+    private JPanel pnlCenterWrapper;
+    private RoundedWrapperPanel pnlWrapperCenter;
 
     public void init() {
         //Set hiển thị mặc định toàn màn hình
@@ -30,6 +36,8 @@ public class Main extends JFrame {
         this.setLocationRelativeTo(null);
         //Tắt ứng dụng khi tắt giao diện
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.setTitle("Hệ thống khách sạn Hai Quân Đức Thịnh");
+//        this.setIconImage();
     }
 
     public Main() {
@@ -50,8 +58,10 @@ public class Main extends JFrame {
         //Tạo panelCenter dùng để cho phần thao tác chính, chứa các màn hình khác với cardLayout 
         mainLayout = new CardLayout();
         pnlCenter = new JPanel(mainLayout);
-        pnlCenter.setBorder(BorderFactory.createEmptyBorder(5, 5, 5,5));
-        this.pMain.add(pnlCenter, BorderLayout.CENTER);
+        pnlWrapperCenter = new RoundedWrapperPanel();
+        pnlWrapperCenter.setBorder(BorderFactory.createEmptyBorder(5, 5, 5,5));
+        pnlWrapperCenter.add(pnlCenter);
+        this.pMain.add(pnlWrapperCenter, BorderLayout.CENTER);
     }
 
     private void createASideBar() {
@@ -87,7 +97,28 @@ public class Main extends JFrame {
     private void createTopCounting(){
         //Tạo phần top bằng 1 panel được custom lại
         cmpTopHeading = new HeadingTop();
-        this.pMain.add(cmpTopHeading, BorderLayout.NORTH);
+        pnlTop = new JPanel();
+        pnlTop.setBackground(CustomUI.darkBlue);
+        pnlTop.setLayout(new BorderLayout());
+        lblSystemName = new JLabel("HAI QUÂN ĐỨC THỊNH");
+        lblSystemName.setFont(CustomUI.bigFont);
+        lblSystemName.setForeground(CustomUI.white);
+        pnlCenterWrapper = new JPanel();
+        pnlCenterWrapper.add(lblSystemName);
+        pnlCenterWrapper.setBackground(CustomUI.darkBlue);
+
+        btnLogOut  = new JButton("Đăng xuất");
+        btnLogOut.setBackground(CustomUI.red);
+        btnLogOut.setForeground(CustomUI.white);
+        btnLogOut.setFont(CustomUI.smallFont);
+
+
+
+        pnlTop.add(cmpTopHeading, BorderLayout.WEST);
+        pnlTop.add(pnlCenterWrapper, BorderLayout.CENTER);
+        pnlTop.add(btnLogOut, BorderLayout.EAST);
+
+        this.pMain.add(pnlTop, BorderLayout.NORTH);
     }
 
     public static void main(String[] args) throws UnsupportedLookAndFeelException {
@@ -110,9 +141,12 @@ public class Main extends JFrame {
         JPanel blue = new JPanel();
         blue.setBackground(Color.blue);
         ReservationManagementPanel tmp = new ReservationManagementPanel();
+        RevenueStatisticPanel pnlStatistic = new RevenueStatisticPanel();
         pnlCenter.add(pink, "dsadsa");
         pnlCenter.add(blue, "Inbox");
-        pnlCenter.add(tmp, "Read");
+        pnlCenter.add(tmp, "Quản lý đặt phòng");
+        pnlCenter.add(pnlStatistic, "Thống kê doanh thu");
+        this.showCard("Quản lý đặt phòng");
     }
 
 }
