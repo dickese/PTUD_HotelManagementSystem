@@ -1,14 +1,14 @@
 package vn.iuh.dto.event.create;
 
-public class CreateRoomEvent {
+public class RoomCreationEvent {
     private final String roomName;
     private final String roomStatus;
     private final String note;
     private final String roomDescription;
     private final String roomCategoryId;
 
-    public CreateRoomEvent(String roomName, String roomStatus, String note, String roomDescription,
-                String roomCategoryId) {
+    public RoomCreationEvent(String roomName, String roomStatus, String note, String roomDescription,
+                             String roomCategoryId) {
         this.roomName = roomName;
         this.roomStatus = roomStatus;
         this.note = note;

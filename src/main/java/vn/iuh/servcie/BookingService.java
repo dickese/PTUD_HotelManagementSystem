@@ -6,5 +6,6 @@ import vn.iuh.dto.response.BookingResponse;
 import java.util.List;
 
 public interface BookingService {
+
     List<BookingResponse> getAllBookingInfo();
 }

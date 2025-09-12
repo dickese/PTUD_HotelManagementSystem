@@ -1,14 +1,14 @@
 package vn.iuh.dto.event.update;
 
-public class UpdateRoomEvent {
+public class RoomModificationEvent {
     private final String id;
     private final String roomName;
     private final String note;
     private final String roomDescription;
     private final String roomCategoryId;
 
-    public UpdateRoomEvent(String id, String roomName, String note, String roomDescription,
-                           String roomCategoryId) {
+    public RoomModificationEvent(String id, String roomName, String note, String roomDescription,
+                                 String roomCategoryId) {
         this.id = id;
         this.roomName = roomName;
         this.note = note;

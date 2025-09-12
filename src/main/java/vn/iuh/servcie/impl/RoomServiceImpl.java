@@ -2,8 +2,8 @@ package vn.iuh.servcie.impl;
 
 import vn.iuh.constraint.EntityIDSymbol;
 import vn.iuh.dao.RoomDAO;
-import vn.iuh.dto.event.create.CreateRoomEvent;
-import vn.iuh.dto.event.update.UpdateRoomEvent;
+import vn.iuh.dto.event.create.RoomCreationEvent;
+import vn.iuh.dto.event.update.RoomModificationEvent;
 import vn.iuh.entity.Room;
 import vn.iuh.servcie.RoomService;
 
@@ -44,7 +44,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public Room createRoom(CreateRoomEvent room) {
+    public Room createRoom(RoomCreationEvent room) {
         Room lastedRoom = roomDAO.findLastRoom();
         String newID = increaseRoomID(lastedRoom.getId());
 
@@ -62,7 +62,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public Room updateRoom(UpdateRoomEvent room) {
+    public Room updateRoom(RoomModificationEvent room) {
         Room existingRoom = roomDAO.findRoomByID(room.getId());
         if (existingRoom == null) {
             System.out.println("Room with ID " + room.getId() + " not found.");

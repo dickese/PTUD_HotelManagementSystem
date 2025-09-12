@@ -2,7 +2,7 @@ package vn.iuh.constraint;
 
 public enum RoomStatus {
     ROOM_AVAILABLE_STATUS("Còn trống"),
-    ROOM_BOOKED_STATUS("Đặt trước"),
+    ROOM_BOOKED_STATUS("Chờ check-in"),
     ROOM_CHECKING_STATUS("Đang kiểm tra"),
     ROOM_USING_STATUS("Đang sử dụng"),
     ROOM_CHECKOUT_LATE_STATUS("Trả phòng trễ"),
