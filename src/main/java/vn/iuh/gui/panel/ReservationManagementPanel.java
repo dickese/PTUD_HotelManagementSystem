@@ -1,10 +1,13 @@
 package vn.iuh.gui.panel;
 
+import org.quartz.*;
+import org.quartz.impl.StdSchedulerFactory;
 import vn.iuh.dto.response.BookingResponse;
 import vn.iuh.entity.Room;
 import vn.iuh.gui.base.CustomUI;
 import vn.iuh.gui.base.GridRoomPanel;
 import vn.iuh.gui.base.RoomItem;
+import vn.iuh.schedule.RoomStatusHandler;
 import vn.iuh.servcie.BookingService;
 import vn.iuh.servcie.impl.BookingServiceImpl;
 import vn.iuh.servcie.impl.RoomServiceImpl;
@@ -26,18 +29,19 @@ public class ReservationManagementPanel extends JPanel {
     public ReservationManagementPanel() {
         bookingService = new BookingServiceImpl();
 
+
         setBorder(new LineBorder(Color.LIGHT_GRAY, 2));
-        setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         init();
     }
 
-    private void init(){
+    private void init() {
         createTopPanel();
         this.add(Box.createVerticalStrut(300));
         createCenterPanel();
     }
 
-    private void createTopPanel(){
+    private void createTopPanel() {
         pnlTop = new JPanel();
         lblTop = new JLabel("Quản lý đặt phòng");
         lblTop.setForeground(CustomUI.white);
@@ -47,30 +51,7 @@ public class ReservationManagementPanel extends JPanel {
         add(pnlTop);
     }
 
-    private void createCenterPanel(){
-//        List<RoomItem> roomItems = List.of(
-//                new RoomItem("101", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-//                new RoomItem("102", "Trống", "Phòng VIP Giường Đôi", null, null, new Color(100, 200, 100)),
-//                new RoomItem("105", "Đang thuê", "Phòng Thường Giường Đơn", "Lê Thị B", "02-12-2024 12:18", new Color(80, 170, 250)),
-//                new RoomItem("109", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-//                new RoomItem("203", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-//                new RoomItem("101", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-//                new RoomItem("102", "Trống", "Phòng VIP Giường Đôi", null, null, new Color(100, 200, 100)),
-//                new RoomItem("105", "Đang thuê", "Phòng Thường Giường Đơn", "Lê Thị B", "02-12-2024 12:18", new Color(80, 170, 250)),
-//                new RoomItem("109", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-//                new RoomItem("203", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-//                new RoomItem("101", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-//                new RoomItem("102", "Trống", "Phòng VIP Giường Đôi", null, null, new Color(100, 200, 100)),
-//                new RoomItem("105", "Đang thuê", "Phòng Thường Giường Đơn", "Lê Thị B", "02-12-2024 12:18", new Color(80, 170, 250)),
-//                new RoomItem("109", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-//                new RoomItem("203", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-//                new RoomItem("101", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-//                new RoomItem("102", "Trống", "Phòng VIP Giường Đôi", null, null, new Color(100, 200, 100)),
-//                new RoomItem("105", "Đang thuê", "Phòng Thường Giường Đơn", "Lê Thị B", "02-12-2024 12:18", new Color(80, 170, 250)),
-//                new RoomItem("109", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100)),
-//                new RoomItem("203", "Trống", "Phòng Thường Giường Đơn", null, null, new Color(100, 200, 100))
-//        );
-
+    private void createCenterPanel() {
         List<RoomItem> roomItems = new ArrayList<>();
 
         List<BookingResponse> bookingResponses = bookingService.getAllBookingInfo();
@@ -80,25 +61,40 @@ public class ReservationManagementPanel extends JPanel {
 
         gridRoomPanels = new GridRoomPanel(roomItems);
         scrollPane = new JScrollPane(gridRoomPanels,
-                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+                                     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                                     JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         setOpaque(true);
         add(scrollPane);
+
+        // Create cron job to update room status every 1 minute
+//        createUpdateRoomStatusSchedule(gridRoomPanels);
     }
 
-//    private RoomItem mapBookingResponseToRoomItem(BookingResponse bookingResponse){
-//        String roomName = bookingResponse.getRoomName();
-//        String status = bookingResponse.getBookingStatus();
-//        String type = bookingResponse.getRoomCategoryName();
-//        String customer = bookingResponse.getCustomerName();
-//        String time = bookingResponse.getCheckInTime();
-//        Color bg;
-//        if(customer == null){
-//            bg = CustomUI.lightGreen;
-//        } else {
-//            bg = CustomUI.lightBlue;
-//        }
-//        return new RoomItem(roomName, status, type, customer, time, bg);
-//    }
+    private void createUpdateRoomStatusSchedule(GridRoomPanel gridRoomPanel) {
+        try {
+            Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
+
+            JobDataMap jobDataMap = new JobDataMap();
+            jobDataMap.put("gridRoomPanel", gridRoomPanel);
+
+            JobDetail jobDetail = JobBuilder.newJob(RoomStatusHandler.class)
+                    .withIdentity("roomStatusUpdateJob", "group1")
+                    .usingJobData(jobDataMap)
+                    .build();
+
+            Trigger trigger = org.quartz.TriggerBuilder.newTrigger()
+                    .withIdentity("roomStatusUpdateTrigger", "group1")
+                    .withSchedule(org.quartz.SimpleScheduleBuilder.simpleSchedule()
+                            .withIntervalInSeconds(10)
+                            .repeatForever())
+                    .build();
+
+            scheduler.start();
+            scheduler.scheduleJob(jobDetail, trigger);
+        } catch (Exception e) {
+            System.out.println("Error creating schedule: " + e.getMessage());
+        }
+    }
+
 }

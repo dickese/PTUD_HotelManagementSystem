@@ -72,6 +72,10 @@ public class BookingResponse {
         return roomStatus;
     }
 
+    public void setRoomStatus(String roomStatus) {
+        this.roomStatus = roomStatus;
+    }
+
     public String getRoomType() {
         return roomType;
     }

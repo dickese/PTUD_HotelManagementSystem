@@ -6,8 +6,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Objects;
 
 public class RoomItem extends JPanel {
+    private BookingResponse bookingResponse;
+
     private void init(){
         this.addMouseListener(new MouseAdapter() {
             @Override
@@ -17,7 +20,13 @@ public class RoomItem extends JPanel {
         });
     }
 
+    public BookingResponse getBookingResponse() {
+        return bookingResponse;
+    }
+
     public RoomItem(BookingResponse bookingResponse) {
+        this.bookingResponse = bookingResponse;
+
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(0, 130));
 //        setBackground(bg);
@@ -156,5 +165,24 @@ public class RoomItem extends JPanel {
 
         add(lblRoom, BorderLayout.NORTH);
         add(content, BorderLayout.CENTER);
+    }
+
+    public String getRoomId() {
+        return this.bookingResponse.getRoomId();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof String)
+            return Objects.equals(bookingResponse.getRoomId(), o);
+
+
+        if (!(o instanceof RoomItem roomItem)) return false;
+        return Objects.equals(bookingResponse, roomItem.bookingResponse);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(bookingResponse);
     }
 }

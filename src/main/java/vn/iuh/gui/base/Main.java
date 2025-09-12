@@ -103,7 +103,6 @@ public class Main extends JFrame {
         this.mainLayout.show(pnlCenter, name);
     }
 
-
     //Tạo các màn hình con cho cardLayout (màn hình chức năng)
     public void initializeMainPanels(){
         JPanel pink = new JPanel();

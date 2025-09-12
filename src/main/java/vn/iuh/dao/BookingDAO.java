@@ -86,6 +86,22 @@ public class BookingDAO {
         return bookings;
     }
 
+    public boolean updateRoomStatus(String roomId, String newStatus) {
+        String query = "UPDATE Room SET room_status = ? WHERE id = ?";
+
+        try {
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setString(1, newStatus);
+            ps.setString(2, roomId);
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private RoomInfo mapResultSetToRoomInfo(ResultSet rs) {
         try {
             return new RoomInfo(
