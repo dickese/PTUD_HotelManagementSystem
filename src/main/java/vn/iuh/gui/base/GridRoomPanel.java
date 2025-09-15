@@ -24,7 +24,6 @@ public class GridRoomPanel extends JPanel implements Serializable {
             RoomItem roomItem = roomItems.get(i);
 
             if (roomIds.contains(roomItem.getRoomId())) {
-                System.out.println("True");
                 BookingResponse data = roomItem.getBookingResponse();
                 data.setRoomStatus(newStatus);
 

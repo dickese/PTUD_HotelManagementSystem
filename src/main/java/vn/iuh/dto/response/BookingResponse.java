@@ -1,6 +1,6 @@
 package vn.iuh.dto.response;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.Objects;
 
 public class BookingResponse {
@@ -12,8 +12,8 @@ public class BookingResponse {
     private double dailyPrice;
     private double hourlyPrice;
     private String customerName;
-    private Date timeIn;
-    private Date timeOut;
+    private Timestamp timeIn;
+    private Timestamp timeOut;
 
     public BookingResponse(String roomId, String roomName, String roomStatus, String roomType, String numberOfCustomers,
                            double dailyPrice, double hourlyPrice) {
@@ -58,7 +58,7 @@ public class BookingResponse {
                             customerName, timeIn, timeOut);
     }
 
-    public void updateBookingInfo(String customerName, Date timeIn, Date timeOut) {
+    public void updateBookingInfo(String customerName, Timestamp timeIn, Timestamp timeOut) {
         this.customerName = customerName;
         this.timeIn = timeIn;
         this.timeOut = timeOut;
@@ -100,11 +100,11 @@ public class BookingResponse {
         return customerName;
     }
 
-    public Date getTimeIn() {
+    public Timestamp getTimeIn() {
         return timeIn;
     }
 
-    public Date getTimeOut() {
+    public Timestamp getTimeOut() {
         return timeOut;
     }
 }

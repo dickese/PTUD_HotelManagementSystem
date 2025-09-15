@@ -6,6 +6,7 @@
 package vn.iuh.gui.base;
 
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
+import vn.iuh.gui.panel.BookingFormPanel;
 import vn.iuh.gui.panel.ReservationManagementPanel;
 import vn.iuh.gui.panel.statistic.RevenueStatisticPanel;
 
@@ -20,8 +21,8 @@ public class Main extends JFrame {
     private JPanel pnlLeftWrapper;
     private JPanel pnlTopWrapper;
     private JPanel pnlLeftTopWrapper;
-    private CardLayout mainLayout;
-    private JPanel pnlCenter;
+    private static CardLayout mainLayout;
+    private static JPanel pnlCenter;
     private UserInfoPanel userInfo;
     private JPanel pnlTop;
     private JLabel lblSystemName;
@@ -129,9 +130,13 @@ public class Main extends JFrame {
     }
 
     //Truyển vào tên của panel, khi gọi sẽ hiển thị nó lên phía trên trong cardLayout
-    public void showCard(String name) {
+    public static void showCard(String name) {
         System.out.println(name);
-        this.mainLayout.show(pnlCenter, name);
+        mainLayout.show(pnlCenter, name);
+    }
+
+    public static void addCard(JPanel panel, String name){
+        pnlCenter.add(panel, name);
     }
 
     //Tạo các màn hình con cho cardLayout (màn hình chức năng)

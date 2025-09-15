@@ -160,10 +160,11 @@ public class RoomDAO {
             room.setId(rs.getString("id"));
             room.setRoomName(rs.getString("roomName"));
             room.setRoomStatus(rs.getString("roomStatus"));
-            room.setCreateDate(rs.getDate("createDate"));
+            room.setCreateDate(rs.getTimestamp("createDate"));
             room.setNote(rs.getString("note"));
             room.setRoomDescription(rs.getString("roomDescription"));
             room.setRoomCategoryId(rs.getString("roomCategoryId"));
+
             return room;
         } catch (SQLException e) {
             throw new TableEntityMismatch("Can`t map ResultSet to Room entity" + e);

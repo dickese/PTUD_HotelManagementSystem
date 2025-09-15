@@ -8,7 +8,8 @@ import vn.iuh.entity.Room;
 import vn.iuh.servcie.RoomService;
 import vn.iuh.util.EntityUtil;
 
-import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 public class RoomServiceImpl implements RoomService {
@@ -56,7 +57,7 @@ public class RoomServiceImpl implements RoomService {
                 newID,
                 room.getRoomName(),
                 room.getRoomStatus(),
-                Date.valueOf(java.time.LocalDate.now()),
+                new Timestamp(new Date().getTime()),
                 room.getNote(),
                 room.getRoomDescription(),
                 room.getRoomCategoryId()

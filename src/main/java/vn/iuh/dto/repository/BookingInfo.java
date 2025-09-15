@@ -1,14 +1,15 @@
 package vn.iuh.dto.repository;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 public class BookingInfo {
     private final String roomId;
     private final String customerName;
-    private final Date timeIn;
-    private final Date timeOut;
+    private final Timestamp timeIn;
+    private final Timestamp timeOut;
 
-    public BookingInfo(String roomId, String customerName, Date timeIn, Date timeOut) {
+    public BookingInfo(String roomId, String customerName, Timestamp timeIn, Timestamp timeOut) {
         this.roomId = roomId;
         this.customerName = customerName;
         this.timeIn = timeIn;
@@ -33,11 +34,11 @@ public class BookingInfo {
         return customerName;
     }
 
-    public Date getTimeIn() {
+    public Timestamp getTimeIn() {
         return timeIn;
     }
 
-    public Date getTimeOut() {
+    public Timestamp getTimeOut() {
         return timeOut;
     }
 }

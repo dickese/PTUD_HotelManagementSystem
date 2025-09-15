@@ -7,18 +7,19 @@ public class Employee {
     private String employeeName;
     private String CCCD;
     private Date birthDate;
+    private String phoneNumber;
 
     public Employee() {
     }
 
-    public Employee(String id, String employeeName, String CCCD, Date birthDate) {
+    public Employee(String id, String employeeName, String CCCD, Date birthDate, String phoneNumber) {
         this.id = id;
         this.employeeName = employeeName;
         this.CCCD = CCCD;
         this.birthDate = birthDate;
+        this.phoneNumber = phoneNumber;
     }
 
-    // Getters and Setters
     public String getId() {
         return id;
     }
@@ -49,5 +50,13 @@ public class Employee {
 
     public void setBirthDate(Date birthDate) {
         this.birthDate = birthDate;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }

@@ -2,6 +2,10 @@ package vn.iuh.dao;
 
 import vn.iuh.dto.repository.BookingInfo;
 import vn.iuh.dto.repository.RoomInfo;
+import vn.iuh.entity.HistoryCheckIn;
+import vn.iuh.entity.ReservationForm;
+import vn.iuh.entity.RoomReservationDetail;
+import vn.iuh.entity.RoomUsageService;
 import vn.iuh.exception.TableEntityMismatch;
 import vn.iuh.util.DatabaseUtil;
 
@@ -17,6 +21,170 @@ public class BookingDAO {
 
     public BookingDAO() {
         this.connection = DatabaseUtil.getConnect();
+    }
+
+    public void enableTransaction() {
+        DatabaseUtil.enableTransaction(connection);
+    }
+
+    public void disableTransaction() {
+        DatabaseUtil.disableTransaction(connection);
+    }
+
+    public void commitTransaction() {
+        try {
+            if (connection != null && !connection.getAutoCommit()) {
+                connection.commit();
+            }
+        } catch (SQLException e) {
+            System.out.println("Lỗi commit transaction: " + e.getMessage());
+            DatabaseUtil.closeConnection(connection);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void rollbackTransaction() {
+        try {
+            if (connection != null && !connection.getAutoCommit()) {
+                connection.rollback();
+            }
+        } catch (SQLException e) {
+            System.out.println("Lỗi rollback transaction: " + e.getMessage());
+            DatabaseUtil.closeConnection(connection);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean insertReservationForm(ReservationForm reservationFormEntity) {
+        String query = "INSERT INTO ReservationForm" +
+                       " (id, reserve_date, note, check_in_date, check_out_date, initial_price" +
+                       ", deposit_price, is_advanced, customer_id, shift_assignment_id)" +
+                       " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try {
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setString(1, reservationFormEntity.getId());
+            ps.setDate(2, reservationFormEntity.getReserveDate());
+            ps.setString(3, reservationFormEntity.getNote());
+            ps.setDate(4, reservationFormEntity.getCheckInDate());
+            ps.setDate(5, reservationFormEntity.getCheckOutDate());
+            ps.setDouble(6, reservationFormEntity.getInitialPrice());
+            ps.setDouble(7, reservationFormEntity.getDepositPrice());
+            ps.setBoolean(8, reservationFormEntity.isAdvanced());
+            ps.setString(9, reservationFormEntity.getCustomerId());
+            ps.setString(10, reservationFormEntity.getShiftAssignmentId());
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            System.out.println("Lỗi insert ReservationForm: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean insertRoomReservationDetail(ReservationForm reservationFormEntity,
+                                                       List<RoomReservationDetail> roomReservationDetails) {
+        String query = "INSERT INTO RoomReservationDetail" +
+                       " (id, time_in, time_out, room_id, reservation_form_id)" +
+                       " VALUES (?, ?, ?, ?, ?)";
+
+        try {
+            PreparedStatement ps = connection.prepareStatement(query);
+
+            for (RoomReservationDetail roomReservationDetail : roomReservationDetails) {
+                ps.setString(1, roomReservationDetail.getId());
+                ps.setDate(2, roomReservationDetail.getTimeIn());
+                ps.setDate(3, roomReservationDetail.getTimeOut());
+                ps.setString(4, roomReservationDetail.getRoomId());
+                ps.setString(5, reservationFormEntity.getId());
+
+                ps.addBatch();
+            }
+
+            int[] rowsAffected = ps.executeBatch();
+            return rowsAffected.length == roomReservationDetails.size();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public boolean insertRoomUsageService(ReservationForm reservationFormEntity, List<RoomUsageService> roomUsageServices) {
+        String query = "INSERT INTO RoomUsageService" +
+                       " (id, quantity, total_price, order_time, service_item_id, reservation_form_id)" +
+                       " VALUES (?, ?, ?, ?, ?, ?)";
+
+        try {
+            PreparedStatement ps = connection.prepareStatement(query);
+
+            for (RoomUsageService roomUsageService : roomUsageServices) {
+                ps.setString(1, roomUsageService.getId());
+                ps.setInt(2, roomUsageService.getQuantity());
+                ps.setDouble(3, roomUsageService.getTotalPrice());
+                ps.setDate(4, roomUsageService.getOrderTime());
+                ps.setString(5, roomUsageService.getServiceItemId());
+                ps.setString(6, reservationFormEntity.getId());
+
+                ps.addBatch();
+            }
+
+            int[] rowsAffected = ps.executeBatch();
+            return rowsAffected.length == roomUsageServices.size();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean insertHistoryCheckIn(ReservationForm reservationForm, List<HistoryCheckIn> historyCheckIns) {
+        String query = "INSERT INTO HistoryCheckIn" +
+                       " (id, check_in_time, is_first, room_reservation_detail_id)" +
+                       " VALUES (?, ?, ?, ?)";
+
+        try {
+            PreparedStatement ps = connection.prepareStatement(query);
+
+            for (HistoryCheckIn historyCheckIn : historyCheckIns) {
+                ps.setString(1, historyCheckIn.getId());
+                ps.setDate(2, historyCheckIn.getCheckInTime());
+                ps.setBoolean(3, historyCheckIn.getIsFirst());
+                ps.setString(4, historyCheckIn.getRoomReservationDetailId());
+
+                ps.addBatch();
+            }
+
+            int[] rowsAffected = ps.executeBatch();
+            return rowsAffected.length == historyCheckIns.size();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<RoomReservationDetail> findRoomReservationDetailByReservationFormID(String reservationFormId) {
+        String query = "SELECT * FROM RoomReservationDetail WHERE reservation_form_id = ?";
+        List<RoomReservationDetail> roomReservationDetails = new ArrayList<>();
+
+        try {
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setString(1, reservationFormId);
+
+            var rs = ps.executeQuery();
+            if (rs.next())
+                roomReservationDetails.add(mapResultSetToRoomReservationDetail(rs));
+            else
+                return null;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (TableEntityMismatch mismatchException) {
+            System.out.println(mismatchException.getMessage());
+            return null;
+        }
+
+        return roomReservationDetails;
     }
 
     public List<RoomInfo> findAllRoomInfo() {
@@ -86,6 +254,83 @@ public class BookingDAO {
         return bookings;
     }
 
+    public ReservationForm findLastReservationForm() {
+        String query = "SELECT TOP 1 * FROM ReservationForm ORDER BY create_at DESC";
+
+        try {
+            PreparedStatement ps = connection.prepareStatement(query);
+
+            var rs = ps.executeQuery();
+            if (rs.next())
+                return mapResultSetToReservationForm(rs);
+            else
+                return null;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (TableEntityMismatch mismatchException) {
+            System.out.println(mismatchException.getMessage());
+            return null;
+        }
+    }
+
+    public RoomReservationDetail findLastRoomReservationDetail() {
+        String query = "SELECT TOP 1 * FROM RoomReservationDetail ORDER BY create_at DESC";
+
+        try {
+            PreparedStatement ps = connection.prepareStatement(query);
+
+            var rs = ps.executeQuery();
+            if (rs.next())
+                return mapResultSetToRoomReservationDetail(rs);
+            else
+                return null;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (TableEntityMismatch mismatchException) {
+            System.out.println(mismatchException.getMessage());
+            return null;
+        }
+    }
+
+    public HistoryCheckIn findLastHistoryCheckIn() {
+        String query = "SELECT TOP 1 * FROM HistoryCheckIn ORDER BY is_first DESC";
+
+        try {
+            PreparedStatement ps = connection.prepareStatement(query);
+
+            var rs = ps.executeQuery();
+            if (rs.next())
+                return mapResultSetToHistoryCheckIn(rs);
+            else
+                return null;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public RoomUsageService findLastRoomUsageService() {
+        String query = "SELECT TOP 1 * FROM RoomUsageService ORDER BY create_at DESC";
+
+        try {
+            PreparedStatement ps = connection.prepareStatement(query);
+
+            var rs = ps.executeQuery();
+            if (rs.next())
+                return mapResultSetToRoomUsageService(rs);
+            else
+                return null;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (TableEntityMismatch mismatchException) {
+            System.out.println(mismatchException.getMessage());
+            return null;
+        }
+    }
+
     public boolean updateRoomStatus(String roomId, String newStatus) {
         String query = "UPDATE Room SET room_status = ? WHERE id = ?";
 
@@ -119,11 +364,78 @@ public class BookingDAO {
     }
 
     private BookingInfo mapResultSetToBookingInfo(ResultSet rs) throws SQLException {
-        return new BookingInfo(
+        BookingInfo bookingInfo = new BookingInfo(
                 rs.getString("id"),
                 rs.getString("customer_name"),
-                rs.getDate("time_in"),
-                rs.getDate("time_out")
+                rs.getTimestamp("time_in"),
+                rs.getTimestamp("time_out")
         );
+
+        System.out.println(bookingInfo.getTimeIn());
+        return bookingInfo;
+    }
+
+    private ReservationForm mapResultSetToReservationForm(ResultSet rs) {
+        try {
+            return new ReservationForm(
+                    rs.getString("id"),
+                    rs.getDate("reserve_date"),
+                    rs.getString("note"),
+                    rs.getDate("check_in_date"),
+                    rs.getDate("check_out_date"),
+                    rs.getDouble("initial_price"),
+                    rs.getDouble("deposit_price"),
+                    rs.getBoolean("is_advanced"),
+                    rs.getString("customer_id"),
+                    rs.getString("shift_assignment_id")
+            );
+        } catch (SQLException e) {
+            throw new TableEntityMismatch("Can`t map ResultSet to ReservationForm" + e.getMessage());
+        }
+    }
+
+    private RoomReservationDetail mapResultSetToRoomReservationDetail(ResultSet rs) {
+        try {
+            return new RoomReservationDetail(
+                    rs.getString("id"),
+                    rs.getDate("time_out"),
+                    rs.getDate("time_in"),
+                    rs.getString("end_type"),
+                    rs.getString("reservation_form_id"),
+                    rs.getString("room_id"),
+                    rs.getString("shift_assignment_id")
+            );
+        } catch (SQLException e) {
+            throw new TableEntityMismatch("Can`t map ResultSet to RoomReservationDetail" + e.getMessage());
+        }
+    }
+
+    private HistoryCheckIn mapResultSetToHistoryCheckIn(ResultSet rs) {
+        try {
+            return new HistoryCheckIn(
+                    rs.getString("id"),
+                    rs.getDate("check_in_time"),
+                    rs.getBoolean("is_first"),
+                    rs.getString("room_reservation_detail_id")
+            );
+        } catch (SQLException e) {
+            throw new TableEntityMismatch("Can`t map ResultSet to HistoryCheckIn" + e.getMessage());
+        }
+    }
+
+    private RoomUsageService mapResultSetToRoomUsageService(ResultSet rs) {
+        try {
+            return new RoomUsageService(
+                    rs.getString("id"),
+                    rs.getDouble("total_price"),
+                    rs.getInt("quantity"),
+                    rs.getDate("order_time"),
+                    rs.getString("reservation_form_id"),
+                    rs.getString("service_item_id"),
+                    rs.getString("shift_assignment_id")
+            );
+        } catch (SQLException e) {
+            throw new TableEntityMismatch("Can`t map ResultSet to RoomUsageService" + e.getMessage());
+        }
     }
 }

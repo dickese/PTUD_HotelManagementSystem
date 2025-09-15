@@ -1,8 +1,13 @@
 package vn.iuh.constraint;
 
 public enum EntityIDSymbol {
-    ROOM_PREFIX("RO", 8);
+    ROOM_PREFIX("RO", 8),
+    RESERVATION_FORM_PREFIX("RF",8),
+    ROOM_RESERVATION_DETAIL_PREFIX("RD",8),
+    HISTORY_CHECKIN_PREFIX("HI",8),
+    ROOM_USAGE_SERVICE_PREFIX("RS",8),;
 //................... Other here
+
 
 
     public String prefix;
