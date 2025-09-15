@@ -5,9 +5,10 @@ public enum EntityIDSymbol {
     RESERVATION_FORM_PREFIX("RF",8),
     ROOM_RESERVATION_DETAIL_PREFIX("RD",8),
     HISTORY_CHECKIN_PREFIX("HI",8),
-    ROOM_USAGE_SERVICE_PREFIX("RS",8),;
+    ROOM_USAGE_SERVICE_PREFIX("RS",8),
+    ACCOUNT_PREFIX("AC", 3),
+    AdditionalFee_PREFIX("AF", 2 );
 //................... Other here
-
 
 
     public String prefix;

@@ -1,10 +1,12 @@
 package vn.iuh.entity;
 
 import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 public class FineTicket {
     private String id;
-    private Time createTime;
+    private Timestamp createTime;
     private String ticketDescription;
     private Double totalFine;
     private String reservationFormId;
@@ -12,7 +14,7 @@ public class FineTicket {
     public FineTicket() {
     }
 
-    public FineTicket(String id, Time createTime, String ticketDescription, Double totalFine,
+    public FineTicket(String id, Timestamp createTime, String ticketDescription, Double totalFine,
                       String reservationFormId) {
         this.id = id;
         this.createTime = createTime;
@@ -30,11 +32,11 @@ public class FineTicket {
         this.id = id;
     }
 
-    public Time getCreateTime() {
+    public Timestamp getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Time createTime) {
+    public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
     }
 
