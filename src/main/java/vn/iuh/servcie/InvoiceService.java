@@ -7,4 +7,5 @@ public interface InvoiceService {
     Invoice createInvoice(Invoice invoice);
     Invoice updateInvoice(Invoice invoice);
     boolean deleteInvoiceByID(String id);
+
 }

@@ -1,10 +1,11 @@
 package vn.iuh.entity;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 public class Invoice {
     private String id;
-    private Date creatDate;
+    private Timestamp creatDate;
     private String payment;
     private double totalPrice;
     private double taxPrice;
@@ -18,7 +19,7 @@ public class Invoice {
     public Invoice() {
     }
 
-    public Invoice(String id, Date creatDate, String payment, double totalPrice, double taxPrice, double totalDue,
+    public Invoice(String id, Timestamp creatDate, String payment, double totalPrice, double taxPrice, double totalDue,
                    String invoiceType, String invoiceStatus, String shiftAssignmentId, String reservationFormId,
                    String customerId) {
         this.id = id;
@@ -43,11 +44,11 @@ public class Invoice {
         this.id = id;
     }
 
-    public Date getCreatDate() {
+    public Timestamp getCreatDate() {
         return creatDate;
     }
 
-    public void setCreatDate(Date creatDate) {
+    public void setCreatDate(Timestamp creatDate) {
         this.creatDate = creatDate;
     }
 
