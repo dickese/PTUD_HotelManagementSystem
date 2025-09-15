@@ -17,7 +17,7 @@ import java.util.List;
 public class RoomStatusHandler implements Job {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        Connection connection = DatabaseUtil.getConnect();
+        Connection connection = DatabaseUtil.getNewConnect();
 
         try {
             GridRoomPanel gridRoomPanel = (GridRoomPanel) context.getMergedJobDataMap().get("gridRoomPanel");

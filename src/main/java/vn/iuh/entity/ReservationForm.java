@@ -112,4 +112,8 @@ public class ReservationForm {
     public void setShiftAssignmentId(String shiftAssignmentId) {
         this.shiftAssignmentId = shiftAssignmentId;
     }
+
+    public boolean isAdvanced() {
+        return isAdvanced;
+    }
 }

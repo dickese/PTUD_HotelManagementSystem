@@ -1,14 +1,18 @@
 package vn.iuh.servcie.impl;
 
+import vn.iuh.constraint.EntityIDSymbol;
 import vn.iuh.constraint.RoomStatus;
 import vn.iuh.dao.BookingDAO;
-import vn.iuh.dao.RoomDAO;
+import vn.iuh.dto.event.create.BookingCreationEvent;
 import vn.iuh.dto.repository.BookingInfo;
 import vn.iuh.dto.repository.RoomInfo;
 import vn.iuh.dto.response.BookingResponse;
-import vn.iuh.entity.Room;
+import vn.iuh.entity.*;
 import vn.iuh.servcie.BookingService;
+import vn.iuh.util.EntityUtil;
 
+import java.sql.Date;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -18,6 +22,57 @@ public class BookingServiceImpl implements BookingService {
 
     public BookingServiceImpl() {
         this.bookingDAO = new BookingDAO();
+    }
+
+    @Override
+    public boolean createBooking(BookingCreationEvent bookingCreationEvent) {
+        // TODO find customer by CCCD or Phone number
+        Customer customer = null;
+
+        bookingDAO.enableTransaction();
+        try {
+            // 1. Create ReservationFormEntity & insert to DB
+            ReservationForm reservationForm = createReservationFormEntity(bookingCreationEvent, null);
+            bookingDAO.insertReservationForm(reservationForm);
+
+            // 2. Create RoomReservationDetail Entity & insert to DB
+            List<RoomReservationDetail> roomReservationDetails = new ArrayList<>();
+            for (String roomId : bookingCreationEvent.getRoomIds())
+                roomReservationDetails.add(
+                        createRoomReservationDetailEntity(bookingCreationEvent, roomId, reservationForm.getId()));
+
+            bookingDAO.insertRoomReservationDetail(reservationForm, roomReservationDetails);
+
+            // 3. Create HistoryCheckInEntity & insert to DB
+            List<HistoryCheckIn> historyCheckIns = new ArrayList<>();
+            for (RoomReservationDetail roomReservationDetail : roomReservationDetails) {
+                historyCheckIns.add(createHistoryCheckInEntity(roomReservationDetail));
+            }
+
+            bookingDAO.insertHistoryCheckIn(reservationForm, historyCheckIns);
+
+            // 4. Create RoomUsageServiceEntity & insert to DB
+            List<RoomUsageService> roomUsageServices = new ArrayList<>();
+            for (String serviceId : bookingCreationEvent.getServiceIds())
+                roomUsageServices.add(
+                        createRoomUsageServiceEntity(bookingCreationEvent, serviceId, reservationForm.getId()));
+
+            bookingDAO.insertRoomUsageService(reservationForm, roomUsageServices);
+
+            // 5. Update Room Status
+            for (String roomId : bookingCreationEvent.getRoomIds())
+                bookingDAO.updateRoomStatus(roomId, RoomStatus.ROOM_CHECKING_STATUS.getStatus());
+
+        } catch (Exception e) {
+            System.out.println("Lỗi khi đặt phòng: " + e.getMessage());
+            bookingDAO.rollbackTransaction();
+            bookingDAO.disableTransaction();
+            return false;
+        }
+
+        bookingDAO.commitTransaction();
+        bookingDAO.disableTransaction();
+        return true;
     }
 
     @Override
@@ -60,6 +115,101 @@ public class BookingServiceImpl implements BookingService {
         }
 
         return bookingResponses;
+    }
+
+    private ReservationForm createReservationFormEntity(BookingCreationEvent bookingCreationEvent, String customerId) {
+        String id;
+        String prefix = EntityIDSymbol.RESERVATION_FORM_PREFIX.getPrefix();
+        int numberLength = EntityIDSymbol.RESERVATION_FORM_PREFIX.getLength();
+
+        ReservationForm lastedReservationForm = bookingDAO.findLastReservationForm();
+        if (lastedReservationForm == null) {
+            id = EntityUtil.increaseEntityID(null, prefix, numberLength);
+        } else {
+            id = EntityUtil.increaseEntityID(lastedReservationForm.getId(), prefix, numberLength);
+        }
+
+        return new ReservationForm(
+                id,
+                bookingCreationEvent.getReserveDate(),
+                bookingCreationEvent.getNote(),
+                bookingCreationEvent.getCheckInDate(),
+                bookingCreationEvent.getCheckOutDate(),
+                bookingCreationEvent.getInitialPrice(),
+                bookingCreationEvent.getDepositPrice(),
+                bookingCreationEvent.isAdvanced(),
+                customerId,
+                bookingCreationEvent.getShiftAssignmentId()
+        );
+    }
+
+    private RoomReservationDetail createRoomReservationDetailEntity(BookingCreationEvent bookingCreationEvent,
+                                                                    String roomId, String reservationFormId) {
+        String id;
+        String prefix = EntityIDSymbol.ROOM_RESERVATION_DETAIL_PREFIX.getPrefix();
+        int numberLength = EntityIDSymbol.ROOM_RESERVATION_DETAIL_PREFIX.getLength();
+
+        RoomReservationDetail lastedReservationDetail = bookingDAO.findLastRoomReservationDetail();
+        if (lastedReservationDetail == null) {
+            id = EntityUtil.increaseEntityID(null, prefix, numberLength);
+        } else {
+            id = EntityUtil.increaseEntityID(lastedReservationDetail.getId(), prefix, numberLength);
+        }
+
+
+        return new RoomReservationDetail(
+                id,
+                bookingCreationEvent.getCheckInDate(),
+                bookingCreationEvent.getCheckOutDate(),
+                null,
+                roomId,
+                reservationFormId,
+                bookingCreationEvent.getShiftAssignmentId()
+        );
+    }
+
+    private RoomUsageService createRoomUsageServiceEntity(BookingCreationEvent bookingCreationEvent, String serviceId,
+                                                          String reservationFormId) {
+        String id;
+        String prefix = EntityIDSymbol.ROOM_USAGE_SERVICE_PREFIX.getPrefix();
+        int numberLength = EntityIDSymbol.ROOM_USAGE_SERVICE_PREFIX.getLength();
+
+        RoomUsageService lastedRoomUsageService = bookingDAO.findLastRoomUsageService();
+        if (lastedRoomUsageService == null) {
+            id = EntityUtil.increaseEntityID(null, prefix, numberLength);
+        } else {
+            id = EntityUtil.increaseEntityID(lastedRoomUsageService.getId(), prefix, numberLength);
+        }
+
+        return new RoomUsageService(
+                id,
+                10,
+                1,
+                Date.valueOf(java.time.LocalDate.now()),
+                serviceId,
+                reservationFormId,
+                bookingCreationEvent.getShiftAssignmentId()
+        );
+    }
+
+    private HistoryCheckIn createHistoryCheckInEntity(RoomReservationDetail roomReservationDetail) {
+        String id;
+        String prefix = EntityIDSymbol.HISTORY_CHECKIN_PREFIX.getPrefix();
+        int numberLength = EntityIDSymbol.HISTORY_CHECKIN_PREFIX.getLength();
+
+        HistoryCheckIn lastedHistoryCheckIn = bookingDAO.findLastHistoryCheckIn();
+        if (lastedHistoryCheckIn == null) {
+            id = EntityUtil.increaseEntityID(null, prefix, numberLength);
+        } else {
+            id = EntityUtil.increaseEntityID(lastedHistoryCheckIn.getId(), prefix, numberLength);
+        }
+
+        return new HistoryCheckIn(
+                id,
+                roomReservationDetail.getTimeIn(),
+                true,
+                roomReservationDetail.getId()
+        );
     }
 
     private BookingResponse createBookingResponse(RoomInfo roomInfo) {
