@@ -64,13 +64,13 @@ public class BookingDAO {
         try {
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setString(1, reservationFormEntity.getId());
-            ps.setDate(2, reservationFormEntity.getReserveDate());
+            ps.setTimestamp(2, reservationFormEntity.getReserveDate());
             ps.setString(3, reservationFormEntity.getNote());
-            ps.setDate(4, reservationFormEntity.getCheckInDate());
-            ps.setDate(5, reservationFormEntity.getCheckOutDate());
+            ps.setTimestamp(4, reservationFormEntity.getCheckInDate());
+            ps.setTimestamp(5, reservationFormEntity.getCheckOutDate());
             ps.setDouble(6, reservationFormEntity.getInitialPrice());
             ps.setDouble(7, reservationFormEntity.getDepositPrice());
-            ps.setBoolean(8, reservationFormEntity.isAdvanced());
+            ps.setBoolean(8, reservationFormEntity.getIsAdvanced());
             ps.setString(9, reservationFormEntity.getCustomerId());
             ps.setString(10, reservationFormEntity.getShiftAssignmentId());
 
@@ -94,8 +94,8 @@ public class BookingDAO {
 
             for (RoomReservationDetail roomReservationDetail : roomReservationDetails) {
                 ps.setString(1, roomReservationDetail.getId());
-                ps.setDate(2, roomReservationDetail.getTimeIn());
-                ps.setDate(3, roomReservationDetail.getTimeOut());
+                ps.setTimestamp(2, roomReservationDetail.getTimeIn());
+                ps.setTimestamp(3, roomReservationDetail.getTimeOut());
                 ps.setString(4, roomReservationDetail.getRoomId());
                 ps.setString(5, reservationFormEntity.getId());
 
@@ -148,7 +148,7 @@ public class BookingDAO {
 
             for (HistoryCheckIn historyCheckIn : historyCheckIns) {
                 ps.setString(1, historyCheckIn.getId());
-                ps.setDate(2, historyCheckIn.getCheckInTime());
+                ps.setTimestamp(2, historyCheckIn.getCheckInTime());
                 ps.setBoolean(3, historyCheckIn.getIsFirst());
                 ps.setString(4, historyCheckIn.getRoomReservationDetailId());
 
@@ -379,15 +379,17 @@ public class BookingDAO {
         try {
             return new ReservationForm(
                     rs.getString("id"),
-                    rs.getDate("reserve_date"),
+                    rs.getTimestamp("reserve_date"),
                     rs.getString("note"),
-                    rs.getDate("check_in_date"),
-                    rs.getDate("check_out_date"),
+                    rs.getTimestamp("check_in_date"),
+                    rs.getTimestamp("check_out_date"),
                     rs.getDouble("initial_price"),
                     rs.getDouble("deposit_price"),
                     rs.getBoolean("is_advanced"),
                     rs.getString("customer_id"),
-                    rs.getString("shift_assignment_id")
+                    rs.getString("shift_assignment_id"),
+                    rs.getTimestamp("create_at"),
+                    rs.getBoolean("is_deleted")
             );
         } catch (SQLException e) {
             throw new TableEntityMismatch("Can`t map ResultSet to ReservationForm" + e.getMessage());
@@ -398,8 +400,8 @@ public class BookingDAO {
         try {
             return new RoomReservationDetail(
                     rs.getString("id"),
-                    rs.getDate("time_out"),
-                    rs.getDate("time_in"),
+                    rs.getTimestamp("time_out"),
+                    rs.getTimestamp("time_in"),
                     rs.getString("end_type"),
                     rs.getString("reservation_form_id"),
                     rs.getString("room_id"),
@@ -414,7 +416,7 @@ public class BookingDAO {
         try {
             return new HistoryCheckIn(
                     rs.getString("id"),
-                    rs.getDate("check_in_time"),
+                    rs.getTimestamp("check_in_time"),
                     rs.getBoolean("is_first"),
                     rs.getString("room_reservation_detail_id")
             );

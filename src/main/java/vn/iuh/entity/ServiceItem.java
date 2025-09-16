@@ -1,17 +1,40 @@
 package vn.iuh.entity;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+
 public class ServiceItem {
     private String id;
     private String itemName;
     private String serviceCategoryId;
+    private Timestamp createAt;
+    private boolean isDeleted;
+
+    public Timestamp getCreateAt() {
+        return createAt;
+    }
+
+    public void setCreateAt(Timestamp createAt) {
+        this.createAt = createAt;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }
 
     public ServiceItem() {
     }
 
-    public ServiceItem(String id, String itemName, String serviceCategoryId) {
+    public ServiceItem(String id, String itemName, String serviceCategoryId, Timestamp createAt, boolean isDeleted) {
         this.id = id;
         this.itemName = itemName;
         this.serviceCategoryId = serviceCategoryId;
+        this.createAt = createAt;
+        this.isDeleted = isDeleted;
     }
 
     // Getters and Setters

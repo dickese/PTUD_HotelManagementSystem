@@ -139,7 +139,9 @@ public class BookingServiceImpl implements BookingService {
                 bookingCreationEvent.getDepositPrice(),
                 bookingCreationEvent.isAdvanced(),
                 customerId,
-                bookingCreationEvent.getShiftAssignmentId()
+                bookingCreationEvent.getShiftAssignmentId(),
+                bookingCreationEvent.getCreateAt(),
+                bookingCreationEvent.getIsDeleTed()
         );
     }
 
