@@ -1,7 +1,10 @@
 package vn.iuh.dao;
 
+import vn.iuh.constraint.RoomStatus;
+import vn.iuh.dto.event.create.RoomFilter;
 import vn.iuh.dto.repository.BookingInfo;
 import vn.iuh.dto.repository.RoomInfo;
+import vn.iuh.dto.response.BookingResponse;
 import vn.iuh.entity.HistoryCheckIn;
 import vn.iuh.entity.ReservationForm;
 import vn.iuh.entity.RoomReservationDetail;
@@ -55,6 +58,58 @@ public class BookingDAO {
         }
     }
 
+    public List<RoomInfo> findAllEmptyRooms() {
+        String query = "SELECT r.id, r.room_name, r.room_status, rc.room_type, rc.number_customer" +
+                       ", rlp.updated_daily_price, rlp.updated_hourly_price" +
+                       " FROM Room r" +
+                       " JOIN RoomCategory rc ON rc.id = r.room_category_id" +
+                       " JOIN RoomListPrice rlp ON rlp.room_category_id = rc.id" +
+                       " WHERE r.room_status = ? AND r.is_deleted = 0" +
+                       " ORDER BY rlp.create_at DESC, r.id ASC";
+        List<RoomInfo> rooms = new ArrayList<>();
+
+        try {
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setString(1, RoomStatus.ROOM_AVAILABLE_STATUS.getStatus());
+            var rs = ps.executeQuery();
+            while (rs.next())
+                rooms.add(mapResultSetToRoomInfo(rs));
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (TableEntityMismatch mismatchException) {
+            System.out.println(mismatchException.getMessage());
+        }
+
+        return rooms;
+    }
+
+    public List<RoomInfo> findRoomsByFilter(RoomFilter roomFilter) {
+        String query = "SELECT r.id, r.room_name, r.room_status, rc.room_type, rc.number_customer" +
+                       ", rlp.updated_daily_price, rlp.updated_hourly_price" +
+                       " FROM Room r" +
+                       " JOIN RoomCategory rc ON rc.id = r.room_category_id" +
+                       " JOIN RoomListPrice rlp ON rlp.room_category_id = rc.id" +
+                       " WHERE r.room_status = ? AND r.is_deleted = 0" +
+                       " ORDER BY rlp.create_at DESC, r.id ASC";
+        List<RoomInfo> rooms = new ArrayList<>();
+
+        try {
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setString(1, RoomStatus.ROOM_AVAILABLE_STATUS.getStatus());
+            var rs = ps.executeQuery();
+            while (rs.next())
+                rooms.add(mapResultSetToRoomInfo(rs));
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (TableEntityMismatch mismatchException) {
+            System.out.println(mismatchException.getMessage());
+        }
+
+        return rooms;
+    }
+
     public boolean insertReservationForm(ReservationForm reservationFormEntity) {
         String query = "INSERT INTO ReservationForm" +
                        " (id, reserve_date, note, check_in_date, check_out_date, initial_price" +
@@ -84,7 +139,7 @@ public class BookingDAO {
     }
 
     public boolean insertRoomReservationDetail(ReservationForm reservationFormEntity,
-                                                       List<RoomReservationDetail> roomReservationDetails) {
+                                               List<RoomReservationDetail> roomReservationDetails) {
         String query = "INSERT INTO RoomReservationDetail" +
                        " (id, time_in, time_out, room_id, reservation_form_id)" +
                        " VALUES (?, ?, ?, ?, ?)";
@@ -111,7 +166,8 @@ public class BookingDAO {
 
     }
 
-    public boolean insertRoomUsageService(ReservationForm reservationFormEntity, List<RoomUsageService> roomUsageServices) {
+    public boolean insertRoomUsageService(ReservationForm reservationFormEntity,
+                                          List<RoomUsageService> roomUsageServices) {
         String query = "INSERT INTO RoomUsageService" +
                        " (id, quantity, total_price, order_time, service_item_id, reservation_form_id)" +
                        " VALUES (?, ?, ?, ?, ?, ?)";
@@ -193,6 +249,7 @@ public class BookingDAO {
                        " FROM Room r" +
                        " JOIN RoomCategory rc ON rc.id = r.room_category_id" +
                        " JOIN RoomListPrice rlp ON rlp.room_category_id = rc.id" +
+                       " WHERE r.is_deleted = 0" +
                        " ORDER BY rlp.create_at DESC, r.id ASC";
         List<RoomInfo> rooms = new ArrayList<>();
 
