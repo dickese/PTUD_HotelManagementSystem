@@ -13,6 +13,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +38,7 @@ public class BookingFormPanel extends JPanel {
     // Booking Information Components
     private JSpinner spnCheckInDate;
     private JSpinner spnCheckOutDate;
+    private JSpinner spnCreateAt;
     private JTextArea txtNote;
     private JTextField txtInitialPrice;
     private JTextField txtDepositPrice;
@@ -91,10 +93,13 @@ public class BookingFormPanel extends JPanel {
         // Booking Information Fields
         spnCheckInDate = new JSpinner(new SpinnerDateModel());
         spnCheckOutDate = new JSpinner(new SpinnerDateModel());
+        spnCreateAt = new JSpinner(new SpinnerDateModel());
         JSpinner.DateEditor checkInEditor = new JSpinner.DateEditor(spnCheckInDate, "dd/MM/yyyy");
         JSpinner.DateEditor checkOutEditor = new JSpinner.DateEditor(spnCheckOutDate, "dd/MM/yyyy");
+        JSpinner.DateEditor createAtEditor = new JSpinner.DateEditor(spnCreateAt, "dd/MM/yyyy");
         spnCheckInDate.setEditor(checkInEditor);
         spnCheckOutDate.setEditor(checkOutEditor);
+        spnCreateAt.setEditor(createAtEditor);
 
         txtNote = new JTextArea(4, 25);
         txtNote.setLineWrap(true);
@@ -525,8 +530,9 @@ public class BookingFormPanel extends JPanel {
             return false;
         }
 
-        java.util.Date checkIn = (java.util.Date) spnCheckInDate.getValue();
-        java.util.Date checkOut = (java.util.Date) spnCheckOutDate.getValue();
+        java.sql.Timestamp checkIn = (java.sql.Timestamp) spnCheckInDate.getValue();
+        java.sql.Timestamp checkOut = (java.sql.Timestamp) spnCheckOutDate.getValue();
+        java.sql.Timestamp createAt = (java.sql.Timestamp) spnCreateAt.getValue();
 
         if (checkOut.before(checkIn)) {
             JOptionPane.showMessageDialog(this, "Ngày trả phòng phải sau ngày nhận phòng!",
@@ -541,10 +547,11 @@ public class BookingFormPanel extends JPanel {
         String customerName = txtCustomerName.getText().trim();
         String phoneNumber = txtPhoneNumber.getText().trim();
         String cccd = txtCCCD.getText().trim();
-        Date reserveDate = new Date(System.currentTimeMillis());
+        Timestamp reserveDate = new Timestamp(System.currentTimeMillis());
         String note = txtNote.getText().trim();
-        Date checkInDate = new Date(((java.util.Date) spnCheckInDate.getValue()).getTime());
-        Date checkOutDate = new Date(((java.util.Date) spnCheckOutDate.getValue()).getTime());
+        Timestamp checkInDate = new Timestamp(((java.sql.Timestamp) spnCheckInDate.getValue()).getTime());
+        Timestamp checkOutDate = new Timestamp(((java.sql.Timestamp) spnCheckOutDate.getValue()).getTime());
+        Timestamp createAt = new Timestamp(((java.sql.Timestamp) spnCreateAt.getValue()).getTime());
         double initialPrice = Double.parseDouble(txtInitialPrice.getText());
         double depositPrice = Double.parseDouble(txtDepositPrice.getText());
         boolean isAdvanced = chkIsAdvanced.isSelected();
@@ -554,7 +561,7 @@ public class BookingFormPanel extends JPanel {
 
         return new BookingCreationEvent(customerName, phoneNumber, cccd, reserveDate, note,
                 checkInDate, checkOutDate, initialPrice, depositPrice, isAdvanced,
-                roomIds, serviceIds, shiftAssignmentId);
+                roomIds, serviceIds, shiftAssignmentId, createAt, false);
     }
 
     private void handleCancel() {

@@ -1,26 +1,31 @@
 package vn.iuh.entity;
 
 import java.sql.Time;
+import java.sql.Timestamp;
 
 public class WorkingHistory {
     private String id;
     private String taskName;
-    private Time createTime;
+    private Timestamp createTime;
     private String actionDescription;
     private String shiftAssignmentId;
     private String accountId;
+    private Timestamp createAt;
+    private int isDeleted;
 
     public WorkingHistory() {
     }
 
-    public WorkingHistory(String id, String taskName, Time createTime, String actionDescription,
-                          String shiftAssignmentId, String accountId) {
+    public WorkingHistory(String id, String taskName, Timestamp createTime, String actionDescription,
+                          String shiftAssignmentId, String accountId, Timestamp createAt, int isDeleted) {
         this.id = id;
         this.taskName = taskName;
         this.createTime = createTime;
         this.actionDescription = actionDescription;
         this.shiftAssignmentId = shiftAssignmentId;
         this.accountId = accountId;
+        this.createAt = createAt;
+        this.isDeleted = isDeleted;
     }
 
     // Getters and Setters
@@ -40,11 +45,11 @@ public class WorkingHistory {
         this.taskName = taskName;
     }
 
-    public Time getCreateTime() {
+    public Timestamp getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Time createTime) {
+    public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
     }
 
@@ -71,4 +76,12 @@ public class WorkingHistory {
     public void setAccountId(String accountId) {
         this.accountId = accountId;
     }
+
+    public Timestamp getCreateAt() { return createAt; }
+
+    public void setCreateAt(Timestamp createAt) { this.createAt = createAt; }
+
+    public int getIsDeleted() { return isDeleted; }
+
+    public void setIsDeleted(int isDeleted) { this.isDeleted = isDeleted; }
 }

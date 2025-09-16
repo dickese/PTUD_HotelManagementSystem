@@ -13,6 +13,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +38,7 @@ public class BookingFormPanelNew extends JPanel {
     // Booking Information Components
     private JSpinner spnCheckInDate;
     private JSpinner spnCheckOutDate;
+    private JSpinner spnCreateAt;
     private JTextArea txtNote;
     private JTextField txtInitialPrice;
     private JTextField txtDepositPrice;
@@ -85,10 +87,13 @@ public class BookingFormPanelNew extends JPanel {
         // Booking Information Fields
         spnCheckInDate = new JSpinner(new SpinnerDateModel());
         spnCheckOutDate = new JSpinner(new SpinnerDateModel());
+        spnCreateAt = new JSpinner(new SpinnerDateModel());
         JSpinner.DateEditor checkInEditor = new JSpinner.DateEditor(spnCheckInDate, "dd/MM/yyyy");
         JSpinner.DateEditor checkOutEditor = new JSpinner.DateEditor(spnCheckOutDate, "dd/MM/yyyy");
+        JSpinner.DateEditor createAtEditor = new JSpinner.DateEditor(spnCreateAt, "dd/MM/yyyy");
         spnCheckInDate.setEditor(checkInEditor);
         spnCheckOutDate.setEditor(checkOutEditor);
+        spnCreateAt.setEditor(createAtEditor);
 
         txtNote = new JTextArea(4, 25);
         txtNote.setLineWrap(true);
@@ -513,8 +518,9 @@ public class BookingFormPanelNew extends JPanel {
         }
 
         // Validate dates
-        java.util.Date checkIn = (java.util.Date) spnCheckInDate.getValue();
-        java.util.Date checkOut = (java.util.Date) spnCheckOutDate.getValue();
+        java.sql.Timestamp checkIn = (java.sql.Timestamp) spnCheckInDate.getValue();
+        java.sql.Timestamp checkOut = (java.sql.Timestamp) spnCheckOutDate.getValue();
+        java.sql.Timestamp createAt = (java.sql.Timestamp) spnCreateAt.getValue();
 
         if (checkOut.before(checkIn)) {
             JOptionPane.showMessageDialog(this, "Ngày trả phòng phải sau ngày nhận phòng!",
@@ -527,8 +533,9 @@ public class BookingFormPanelNew extends JPanel {
 
     private BookingCreationEvent createBookingEvent() {
         // Convert spinner dates to SQL dates
-        Date checkInDate = new Date(((java.util.Date) spnCheckInDate.getValue()).getTime());
-        Date checkOutDate = new Date(((java.util.Date) spnCheckOutDate.getValue()).getTime());
+        Timestamp checkInDate = new Timestamp(((java.sql.Timestamp) spnCheckInDate.getValue()).getTime());
+        Timestamp checkOutDate = new Timestamp(((java.sql.Timestamp) spnCheckOutDate.getValue()).getTime());
+        Timestamp createAt = new Timestamp(((java.sql.Timestamp) spnCreateAt.getValue()).getTime());
 
         // Parse prices
         double initialPrice = Double.parseDouble(txtInitialPrice.getText().trim());
@@ -538,11 +545,12 @@ public class BookingFormPanelNew extends JPanel {
         List<String> roomIds = List.of(selectedRoom.getRoomId());
         List<String> serviceIds = List.of(); // Empty for now
 
+        //
         return new BookingCreationEvent(
             txtCustomerName.getText().trim(),
             txtPhoneNumber.getText().trim(),
             txtCCCD.getText().trim(),
-            Date.valueOf(LocalDate.now()), // Booking date is today
+            new Timestamp(Date.valueOf(LocalDate.now()).getTime()), // Booking date is today
             txtNote.getText(),
             checkInDate,
             checkOutDate,
@@ -551,7 +559,9 @@ public class BookingFormPanelNew extends JPanel {
             chkIsAdvanced.isSelected(),
             roomIds,
             serviceIds,
-            null
+                (String) null,
+                createAt,
+                false
         );
     }
 }

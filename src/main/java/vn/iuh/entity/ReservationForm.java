@@ -1,25 +1,45 @@
 package vn.iuh.entity;
 
-import java.sql.Date;
+import java.sql.Timestamp;
+import java.sql.Timestamp;
 
 public class ReservationForm {
     private String id;
-    private Date reserveDate;
+    private Timestamp reserveDate;
     private String note;
-    private Date checkInDate;
-    private Date checkOutDate;
+    private Timestamp checkInDate;
+    private Timestamp checkOutDate;
     private double initialPrice;
     private double depositPrice;
     private boolean isAdvanced;
     private String customerId;
     private String shiftAssignmentId;
+    private Timestamp createAt;
+
+    public Timestamp getCreateAt() {
+        return createAt;
+    }
+
+    public void setCreateAt(Timestamp createAt) {
+        this.createAt = createAt;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }
+
+    private boolean isDeleted;
 
     public ReservationForm() {
     }
 
-    public ReservationForm(String id, Date reserveDate, String note, Date checkInDate, Date checkOutDate,
+    public ReservationForm(String id, Timestamp reserveDate, String note, Timestamp checkInDate, Timestamp checkOutDate,
                            double initialPrice, double depositPrice, boolean isAdvanced, String customerId,
-                           String shiftAssignmentId) {
+                           String shiftAssignmentId, Timestamp createAt, boolean isDeleted) {
         this.id = id;
         this.reserveDate = reserveDate;
         this.note = note;
@@ -30,6 +50,8 @@ public class ReservationForm {
         this.isAdvanced = isAdvanced;
         this.customerId = customerId;
         this.shiftAssignmentId = shiftAssignmentId;
+        this.createAt = createAt;
+        this.isDeleted = isDeleted;
     }
 
     // Getters and Setters
@@ -41,11 +63,11 @@ public class ReservationForm {
         this.id = id;
     }
 
-    public Date getReserveDate() {
+    public Timestamp getReserveDate() {
         return reserveDate;
     }
 
-    public void setReserveDate(Date reserveDate) {
+    public void setReserveDate(Timestamp reserveDate) {
         this.reserveDate = reserveDate;
     }
 
@@ -57,19 +79,19 @@ public class ReservationForm {
         this.note = note;
     }
 
-    public Date getCheckInDate() {
+    public Timestamp getCheckInDate() {
         return checkInDate;
     }
 
-    public void setCheckInDate(Date checkInDate) {
+    public void setCheckInDate(Timestamp checkInDate) {
         this.checkInDate = checkInDate;
     }
 
-    public Date getCheckOutDate() {
+    public Timestamp getCheckOutDate() {
         return checkOutDate;
     }
 
-    public void setCheckOutDate(Date checkOutDate) {
+    public void setCheckOutDate(Timestamp checkOutDate) {
         this.checkOutDate = checkOutDate;
     }
 
@@ -113,7 +135,7 @@ public class ReservationForm {
         this.shiftAssignmentId = shiftAssignmentId;
     }
 
-    public boolean isAdvanced() {
+    public boolean setIsAdvanced() {
         return isAdvanced;
     }
 }

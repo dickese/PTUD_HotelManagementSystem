@@ -117,4 +117,5 @@ public class FurnitureItemDAO {
             throw new TableEntityMismatch("Can't map ResultSet to FurnitureItem " + e);
         }
     }
+
 }
