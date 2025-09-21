@@ -1,27 +1,30 @@
 package vn.iuh.dto.event.create;
 
 import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.List;
 
 public class BookingCreationEvent {
     private String customerName;
     private String phoneNumber;
     private String CCCD;
-    private Date reserveDate;
+    private Timestamp reserveDate;
     private String note;
-    private Date checkInDate;
-    private Date checkOutDate;
+    private Timestamp checkInDate;
+    private Timestamp checkOutDate;
     private double initialPrice;
     private double depositPrice;
     private boolean isAdvanced;
     private List<String> roomIds;
     private List<String> serviceIds;
     private String shiftAssignmentId;
-
-    public BookingCreationEvent(String customerName, String phoneNumber, String CCCD, Date reserveDate, String note,
-                                Date checkInDate, Date checkOutDate, double initialPrice, double depositPrice,
+    private Timestamp createAt;
+    private boolean isDeleted;
+    public BookingCreationEvent(String customerName, String phoneNumber, String CCCD, Timestamp reserveDate, String note,
+                                Timestamp checkInDate, Timestamp checkOutDate, double initialPrice, double depositPrice,
                                 boolean isAdvanced, List<String> roomIds, List<String> serviceIds,
-                                String shiftAssignmentId) {
+                                String shiftAssignmentId, Timestamp createAt, boolean isDeleted) {
         this.customerName = customerName;
         this.phoneNumber = phoneNumber;
         this.CCCD = CCCD;
@@ -35,6 +38,8 @@ public class BookingCreationEvent {
         this.roomIds = roomIds;
         this.serviceIds = serviceIds;
         this.shiftAssignmentId = shiftAssignmentId;
+        this.createAt = createAt;
+        this.isDeleted = isDeleted;
     }
 
     public String getCustomerName() {
@@ -49,7 +54,7 @@ public class BookingCreationEvent {
         return CCCD;
     }
 
-    public Date getReserveDate() {
+    public Timestamp getReserveDate() {
         return reserveDate;
     }
 
@@ -57,11 +62,11 @@ public class BookingCreationEvent {
         return note;
     }
 
-    public Date getCheckInDate() {
+    public Timestamp getCheckInDate() {
         return checkInDate;
     }
 
-    public Date getCheckOutDate() {
+    public Timestamp getCheckOutDate() {
         return checkOutDate;
     }
 
@@ -88,4 +93,8 @@ public class BookingCreationEvent {
     public String getShiftAssignmentId() {
         return shiftAssignmentId;
     }
+
+    public Timestamp getCreateAt() { return createAt; }
+
+    public boolean getIsDeleTed() { return isDeleted; }
 }

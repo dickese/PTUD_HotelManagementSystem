@@ -1,11 +1,11 @@
 package vn.iuh.entity;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 public class RoomReservationDetail {
     private String id;
-    private Date timeOut;
-    private Date timeIn;
+    private Timestamp timeOut;
+    private Timestamp timeIn;
     private String endType;
     private String reservationFormId;
     private String roomId;
@@ -14,7 +14,7 @@ public class RoomReservationDetail {
     public RoomReservationDetail() {
     }
 
-    public RoomReservationDetail(String id, Date timeOut, Date timeIn, String endType, String reservationFormId,
+    public RoomReservationDetail(String id, Timestamp timeOut, Timestamp timeIn, String endType, String reservationFormId,
                                  String roomId, String shiftAssignmentId) {
         this.id = id;
         this.timeOut = timeOut;
@@ -34,19 +34,19 @@ public class RoomReservationDetail {
         this.id = id;
     }
 
-    public Date getTimeOut() {
+    public Timestamp getTimeOut() {
         return timeOut;
     }
 
-    public void setTimeOut(Date timeOut) {
+    public void setTimeOut(Timestamp timeOut) {
         this.timeOut = timeOut;
     }
 
-    public Date getTimeIn() {
+    public Timestamp getTimeIn() {
         return timeIn;
     }
 
-    public void setTimeIn(Date timeIn) {
+    public void setTimeIn(Timestamp timeIn) {
         this.timeIn = timeIn;
     }
 

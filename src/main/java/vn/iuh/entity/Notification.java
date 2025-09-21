@@ -1,21 +1,26 @@
 package vn.iuh.entity;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 public class Notification {
     private String id;
-    private Date createTime;
+    private Timestamp createTime;
     private String notiMessage;
     private String shiftAssignmentId;
+    private Timestamp createAt;
+    private boolean isDeleted;
 
     public Notification() {
     }
 
-    public Notification(String id, Date createTime, String notiMessage, String shiftAssignmentId) {
+    public Notification(String id, Timestamp createTime, String notiMessage, String shiftAssignmentId, Timestamp createAt, boolean isDeleted) {
         this.id = id;
         this.createTime = createTime;
         this.notiMessage = notiMessage;
         this.shiftAssignmentId = shiftAssignmentId;
+        this.createAt = createAt;
+        this.isDeleted = isDeleted;
     }
 
     // Getters and Setters
@@ -27,11 +32,11 @@ public class Notification {
         this.id = id;
     }
 
-    public Date getCreateTime() {
+    public Timestamp getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Date createTime) {
+    public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
     }
 
@@ -50,4 +55,12 @@ public class Notification {
     public void setShiftAssignmentId(String shiftAssignmentId) {
         this.shiftAssignmentId = shiftAssignmentId;
     }
+
+    public Timestamp getCreateAt() { return createAt; }
+
+    public void setCreateAt(Timestamp createAt) { this.createAt = createAt; }
+
+    public boolean getIsDeleted() { return isDeleted; }
+
+    public void setIsDeleted(boolean isDeleted) { this.isDeleted = isDeleted; }
 }

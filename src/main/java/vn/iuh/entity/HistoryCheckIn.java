@@ -1,17 +1,17 @@
 package vn.iuh.entity;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 public class HistoryCheckIn {
     private String id;
-    private Date checkInTime;
+    private Timestamp checkInTime;
     private boolean isFirst;
     private String roomReservationDetailId;
 
     public HistoryCheckIn() {
     }
 
-    public HistoryCheckIn(String id, Date checkInTime, boolean isFirst, String roomReservationDetailId) {
+    public HistoryCheckIn(String id, Timestamp checkInTime, boolean isFirst, String roomReservationDetailId) {
         this.id = id;
         this.checkInTime = checkInTime;
         this.isFirst = isFirst;
@@ -27,11 +27,11 @@ public class HistoryCheckIn {
         this.id = id;
     }
 
-    public Date getCheckInTime() {
+    public Timestamp getCheckInTime() {
         return checkInTime;
     }
 
-    public void setCheckInTime(Date checkInTime) {
+    public void setCheckInTime(Timestamp checkInTime) {
         this.checkInTime = checkInTime;
     }
 
