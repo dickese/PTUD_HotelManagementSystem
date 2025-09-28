@@ -3,16 +3,18 @@ package vn.iuh.dto.repository;
 public class RoomInfo {
     private final String id;
     private final String roomName;
+    private boolean isActive;
     private final String roomStatus;
     private final String roomType;
     private final String numberOfCustomers;
     private final double dailyPrice;
     private final double hourlyPrice;
 
-    public RoomInfo(String id, String roomName, String roomStatus, String roomType, String numberOfCustomers,
+    public RoomInfo(String id, String roomName, boolean isActive, String roomStatus, String roomType, String numberOfCustomers,
                     double dailyPrice, double hourlyPrice) {
         this.id = id;
         this.roomName = roomName;
+        this.isActive = isActive;
         this.roomStatus = roomStatus;
         this.roomType = roomType;
         this.numberOfCustomers = numberOfCustomers;
@@ -26,6 +28,10 @@ public class RoomInfo {
 
     public String getRoomName() {
         return roomName;
+    }
+
+    public boolean isActive() {
+        return isActive;
     }
 
     public String getRoomStatus() {

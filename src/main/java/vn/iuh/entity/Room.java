@@ -1,12 +1,11 @@
 package vn.iuh.entity;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 
 public class Room {
     private String id;
     private String roomName;
-    private String roomStatus;
+    private boolean isActive;
     private Timestamp createDate;
     private String note;
     private String roomDescription;
@@ -15,11 +14,11 @@ public class Room {
     public Room() {
     }
 
-    public Room(String id, String roomName, String roomStatus, Timestamp createDate, String note, String roomDescription,
+    public Room(String id, String roomName, boolean isActive, Timestamp createDate, String note, String roomDescription,
                 String roomCategoryId) {
         this.id = id;
         this.roomName = roomName;
-        this.roomStatus = roomStatus;
+        this.isActive = isActive;
         this.createDate = createDate;
         this.note = note;
         this.roomDescription = roomDescription;
@@ -43,12 +42,12 @@ public class Room {
         this.roomName = roomName;
     }
 
-    public String getRoomStatus() {
-        return roomStatus;
+    public boolean isActive() {
+        return isActive;
     }
 
-    public void setRoomStatus(String roomStatus) {
-        this.roomStatus = roomStatus;
+    public void setActive(boolean active) {
+        this.isActive = active;
     }
 
     public Timestamp getCreateDate() {

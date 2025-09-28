@@ -26,18 +26,15 @@ public class BookingDAO {
         this.connection = DatabaseUtil.getConnect();
     }
 
-    public void enableTransaction() {
+    public void beginTransaction() {
         DatabaseUtil.enableTransaction(connection);
-    }
-
-    public void disableTransaction() {
-        DatabaseUtil.disableTransaction(connection);
     }
 
     public void commitTransaction() {
         try {
             if (connection != null && !connection.getAutoCommit()) {
                 connection.commit();
+                DatabaseUtil.disableTransaction(connection);
             }
         } catch (SQLException e) {
             System.out.println("Lỗi commit transaction: " + e.getMessage());
@@ -50,6 +47,7 @@ public class BookingDAO {
         try {
             if (connection != null && !connection.getAutoCommit()) {
                 connection.rollback();
+                DatabaseUtil.disableTransaction(connection);
             }
         } catch (SQLException e) {
             System.out.println("Lỗi rollback transaction: " + e.getMessage());
@@ -59,12 +57,12 @@ public class BookingDAO {
     }
 
     public List<RoomInfo> findAllEmptyRooms() {
-        String query = "SELECT r.id, r.room_name, r.room_status, rc.room_type, rc.number_customer" +
+        String query = "SELECT r.id, r.room_name, r.is_active, rc.room_type, rc.number_customer" +
                        ", rlp.updated_daily_price, rlp.updated_hourly_price" +
                        " FROM Room r" +
                        " JOIN RoomCategory rc ON rc.id = r.room_category_id" +
                        " JOIN RoomListPrice rlp ON rlp.room_category_id = rc.id" +
-                       " WHERE r.room_status = ? AND r.is_deleted = 0" +
+                       " WHERE r.is_active = ? AND r.is_deleted = 0" +
                        " ORDER BY rlp.create_at DESC, r.id ASC";
         List<RoomInfo> rooms = new ArrayList<>();
 
@@ -85,12 +83,12 @@ public class BookingDAO {
     }
 
     public List<RoomInfo> findRoomsByFilter(RoomFilter roomFilter) {
-        String query = "SELECT r.id, r.room_name, r.room_status, rc.room_type, rc.number_customer" +
+        String query = "SELECT r.id, r.room_name, r.is_active, rc.room_type, rc.number_customer" +
                        ", rlp.updated_daily_price, rlp.updated_hourly_price" +
                        " FROM Room r" +
                        " JOIN RoomCategory rc ON rc.id = r.room_category_id" +
                        " JOIN RoomListPrice rlp ON rlp.room_category_id = rc.id" +
-                       " WHERE r.room_status = ? AND r.is_deleted = 0" +
+                       " WHERE r.is_active = ? AND r.is_deleted = 0" +
                        " ORDER BY rlp.create_at DESC, r.id ASC";
         List<RoomInfo> rooms = new ArrayList<>();
 
@@ -113,7 +111,7 @@ public class BookingDAO {
     public boolean insertReservationForm(ReservationForm reservationFormEntity) {
         String query = "INSERT INTO ReservationForm" +
                        " (id, reserve_date, note, check_in_date, check_out_date, initial_price" +
-                       ", deposit_price, is_advanced, customer_id, shift_assignment_id)" +
+                       ", deposite_price, is_advanced, customer_id, shift_assignment_id)" +
                        " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
@@ -141,18 +139,21 @@ public class BookingDAO {
     public boolean insertRoomReservationDetail(ReservationForm reservationFormEntity,
                                                List<RoomReservationDetail> roomReservationDetails) {
         String query = "INSERT INTO RoomReservationDetail" +
-                       " (id, time_in, time_out, room_id, reservation_form_id)" +
-                       " VALUES (?, ?, ?, ?, ?)";
+                       " (id, time_in, time_out, reservation_form_id, room_id, shift_assignment_id)" +
+                       " VALUES (?, ?, ?, ?, ?, ?)";
 
         try {
             PreparedStatement ps = connection.prepareStatement(query);
 
             for (RoomReservationDetail roomReservationDetail : roomReservationDetails) {
+                System.out.println(roomReservationDetail.getRoomId());
+
                 ps.setString(1, roomReservationDetail.getId());
                 ps.setTimestamp(2, roomReservationDetail.getTimeIn());
                 ps.setTimestamp(3, roomReservationDetail.getTimeOut());
-                ps.setString(4, roomReservationDetail.getRoomId());
-                ps.setString(5, reservationFormEntity.getId());
+                ps.setString(4, reservationFormEntity.getId());
+                ps.setString(5, roomReservationDetail.getRoomId());
+                ps.setString(6, reservationFormEntity.getShiftAssignmentId());
 
                 ps.addBatch();
             }
@@ -169,7 +170,7 @@ public class BookingDAO {
     public boolean insertRoomUsageService(ReservationForm reservationFormEntity,
                                           List<RoomUsageService> roomUsageServices) {
         String query = "INSERT INTO RoomUsageService" +
-                       " (id, quantity, total_price, order_time, service_item_id, reservation_form_id)" +
+                       " (id, quantity, total_price, order_time, service_item_id, room_detail_id)" +
                        " VALUES (?, ?, ?, ?, ?, ?)";
 
         try {
@@ -244,7 +245,7 @@ public class BookingDAO {
     }
 
     public List<RoomInfo> findAllRoomInfo() {
-        String query = "SELECT r.id, r.room_name, r.room_status, rc.room_type, rc.number_customer" +
+        String query = "SELECT r.id, r.room_name, r.is_active, rc.room_type, rc.number_customer" +
                        ", rlp.updated_daily_price, rlp.updated_hourly_price" +
                        " FROM Room r" +
                        " JOIN RoomCategory rc ON rc.id = r.room_category_id" +
@@ -389,7 +390,7 @@ public class BookingDAO {
     }
 
     public boolean updateRoomStatus(String roomId, String newStatus) {
-        String query = "UPDATE Room SET room_status = ? WHERE id = ?";
+        String query = "UPDATE Room SET is_active = ? WHERE id = ?";
 
         try {
             PreparedStatement ps = connection.prepareStatement(query);
@@ -409,7 +410,8 @@ public class BookingDAO {
             return new RoomInfo(
                     rs.getString("id"),
                     rs.getString("room_name"),
-                    rs.getString("room_status"),
+                    rs.getBoolean("is_active"),
+                    rs.getString("is_active"),
                     rs.getString("room_type"),
                     rs.getString("number_customer"),
                     rs.getDouble("updated_daily_price"),

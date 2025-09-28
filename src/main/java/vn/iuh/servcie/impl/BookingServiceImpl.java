@@ -30,7 +30,7 @@ public class BookingServiceImpl implements BookingService {
         // TODO find customer by CCCD or Phone number
         Customer customer = null;
 
-        bookingDAO.enableTransaction();
+        bookingDAO.beginTransaction();
         try {
             // 1. Create ReservationFormEntity & insert to DB
             ReservationForm reservationForm = createReservationFormEntity(bookingCreationEvent, null);
@@ -66,13 +66,13 @@ public class BookingServiceImpl implements BookingService {
 
         } catch (Exception e) {
             System.out.println("Lỗi khi đặt phòng: " + e.getMessage());
+            System.out.println("Rollback transaction");
+            e.printStackTrace();
             bookingDAO.rollbackTransaction();
-            bookingDAO.disableTransaction();
             return false;
         }
 
         bookingDAO.commitTransaction();
-        bookingDAO.disableTransaction();
         return true;
     }
 
@@ -90,7 +90,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingResponse> getRoomsByFilter(RoomFilter roomFilter) {
-        return bookingDAO.findRoomsByFilter(roomFilter);
+//        return bookingDAO.findRoomsByFilter(roomFilter);
+        return null;
     }
 
     @Override
@@ -182,8 +183,8 @@ public class BookingServiceImpl implements BookingService {
                 bookingCreationEvent.getCheckInDate(),
                 bookingCreationEvent.getCheckOutDate(),
                 null,
-                roomId,
                 reservationFormId,
+                roomId,
                 bookingCreationEvent.getShiftAssignmentId()
         );
     }
@@ -236,6 +237,7 @@ public class BookingServiceImpl implements BookingService {
         return new BookingResponse(
                 roomInfo.getId(),
                 roomInfo.getRoomName(),
+                roomInfo.isActive(),
                 roomInfo.getRoomStatus(),
                 roomInfo.getRoomType(),
                 roomInfo.getNumberOfCustomers(),

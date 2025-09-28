@@ -11,7 +11,7 @@ public class GridRoomPanel extends JPanel implements Serializable {
     private List<RoomItem> roomItems;
 
     private void init(List<RoomItem> rooms){
-        setLayout(new GridLayout(0,4, 10,10));
+        setLayout(new GridLayout(0,3, 10,10));
 
         this.roomItems = rooms;
         for(RoomItem room : rooms){
@@ -42,5 +42,9 @@ public class GridRoomPanel extends JPanel implements Serializable {
 
     public GridRoomPanel(List<RoomItem> rooms) {
         init(rooms);
+    }
+
+    public List<RoomItem> getRoomItems() {
+        return roomItems;
     }
 }
