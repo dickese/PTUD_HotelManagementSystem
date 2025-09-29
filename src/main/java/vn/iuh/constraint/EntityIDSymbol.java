@@ -6,8 +6,8 @@ public enum EntityIDSymbol {
     ROOM_RESERVATION_DETAIL_PREFIX("RD",8),
     HISTORY_CHECKIN_PREFIX("HI",8),
     ROOM_USAGE_SERVICE_PREFIX("RS",8),
-    ACCOUNT_PREFIX("AC", 3),
-    AdditionalFee_PREFIX("AF", 2 );
+    ACCOUNT_PREFIX("AC", 8),
+    AdditionalFee_PREFIX("AF", 8);
 //................... Other here
 
 

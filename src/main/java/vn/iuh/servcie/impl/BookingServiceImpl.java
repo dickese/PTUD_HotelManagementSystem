@@ -4,6 +4,7 @@ import vn.iuh.constraint.EntityIDSymbol;
 import vn.iuh.constraint.RoomStatus;
 import vn.iuh.dao.BookingDAO;
 import vn.iuh.dto.event.create.BookingCreationEvent;
+import vn.iuh.dto.event.create.RoomFilter;
 import vn.iuh.dto.repository.BookingInfo;
 import vn.iuh.dto.repository.RoomInfo;
 import vn.iuh.dto.response.BookingResponse;
@@ -29,7 +30,7 @@ public class BookingServiceImpl implements BookingService {
         // TODO find customer by CCCD or Phone number
         Customer customer = null;
 
-        bookingDAO.enableTransaction();
+        bookingDAO.beginTransaction();
         try {
             // 1. Create ReservationFormEntity & insert to DB
             ReservationForm reservationForm = createReservationFormEntity(bookingCreationEvent, null);
@@ -65,14 +66,32 @@ public class BookingServiceImpl implements BookingService {
 
         } catch (Exception e) {
             System.out.println("Lỗi khi đặt phòng: " + e.getMessage());
+            System.out.println("Rollback transaction");
+            e.printStackTrace();
             bookingDAO.rollbackTransaction();
-            bookingDAO.disableTransaction();
             return false;
         }
 
         bookingDAO.commitTransaction();
-        bookingDAO.disableTransaction();
         return true;
+    }
+
+    @Override
+    public List<BookingResponse> getAllEmptyRooms() {
+        List<RoomInfo> RoomInfos = bookingDAO.findAllEmptyRooms();
+
+        List<BookingResponse> bookingResponses = new ArrayList<>();
+        for (RoomInfo roomInfo : RoomInfos) {
+            bookingResponses.add(createBookingResponse(roomInfo));
+        }
+
+        return bookingResponses;
+    }
+
+    @Override
+    public List<BookingResponse> getRoomsByFilter(RoomFilter roomFilter) {
+//        return bookingDAO.findRoomsByFilter(roomFilter);
+        return null;
     }
 
     @Override
@@ -164,8 +183,8 @@ public class BookingServiceImpl implements BookingService {
                 bookingCreationEvent.getCheckInDate(),
                 bookingCreationEvent.getCheckOutDate(),
                 null,
-                roomId,
                 reservationFormId,
+                roomId,
                 bookingCreationEvent.getShiftAssignmentId()
         );
     }
@@ -218,6 +237,7 @@ public class BookingServiceImpl implements BookingService {
         return new BookingResponse(
                 roomInfo.getId(),
                 roomInfo.getRoomName(),
+                roomInfo.isActive(),
                 roomInfo.getRoomStatus(),
                 roomInfo.getRoomType(),
                 roomInfo.getNumberOfCustomers(),

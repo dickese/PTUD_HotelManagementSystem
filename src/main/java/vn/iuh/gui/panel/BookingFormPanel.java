@@ -1,26 +1,25 @@
 package vn.iuh.gui.panel;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import vn.iuh.dto.event.create.BookingCreationEvent;
 import vn.iuh.dto.response.BookingResponse;
 import vn.iuh.gui.base.CustomUI;
 import vn.iuh.gui.base.Main;
-import vn.iuh.servcie.BookingService;
-import vn.iuh.servcie.impl.BookingServiceImpl;
+import vn.iuh.gui.dialog.ServiceSelectionDialog;
+import vn.iuh.util.IconUtil;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.util.Arrays;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class BookingFormPanel extends JPanel {
     private BookingResponse selectedRoom;
-    private BookingService bookingService;
+    private vn.iuh.servcie.BookingService bookingService;
 
     // Room Information Components
     private JLabel lblRoomNumber;
@@ -43,27 +42,36 @@ public class BookingFormPanel extends JPanel {
     private JTextField txtInitialPrice;
     private JTextField txtDepositPrice;
     private JCheckBox chkIsAdvanced;
+    private JButton reservationButton;
 
-    // Service Components
-    private JPanel serviceSelectionPanel;
-    private JTextField txtSearchService;
-    private JPanel serviceListPanel;
-    private JLabel lblTotalServiceCost;
-    private boolean isServicePanelVisible = false;
-    private java.util.List<String> selectedServices = new java.util.ArrayList<>();
+    // Service Components - simplified to use dialog
+    private List<String> selectedServices = new ArrayList<>();
 
     // Action Buttons
-    private JButton btnConfirmBooking;
     private JButton btnCancel;
     private JButton btnCalculatePrice;
-    private JButton btnAddService;
 
     // Main content components
     private JPanel mainContentPanel;
 
+    // Dropdown panel states
+    private boolean isRoomInfoCollapsed = false;
+    private boolean isCustomerInfoCollapsed = false;
+    private boolean isBookingInfoCollapsed = false;
+    private boolean isActionMenuCollapsed = false;
+
+    // Dropdown content panels
+    private JPanel roomInfoContent;
+    private JPanel customerInfoContent;
+    private JPanel bookingInfoContent;
+    private JPanel actionMenuContent;
+
+    // Close button
+    private JButton closeButton;
+
     public BookingFormPanel(BookingResponse roomInfo) {
         this.selectedRoom = roomInfo;
-        this.bookingService = new BookingServiceImpl();
+        this.bookingService = new vn.iuh.servcie.impl.BookingServiceImpl();
 
         initializeComponents();
         setupLayout();
@@ -86,9 +94,9 @@ public class BookingFormPanel extends JPanel {
         lblRoomStatus = new JLabel();
 
         // Customer Information Fields - increased width
-        txtCustomerName = new JTextField(30);
-        txtPhoneNumber = new JTextField(30);
-        txtCCCD = new JTextField(30);
+        txtCustomerName = new JTextField(25);
+        txtPhoneNumber = new JTextField(25);
+        txtCCCD = new JTextField(25);
 
         // Booking Information Fields
         spnCheckInDate = new JSpinner(new SpinnerDateModel());
@@ -108,21 +116,15 @@ public class BookingFormPanel extends JPanel {
         txtInitialPrice = new JTextField(15);
         txtDepositPrice = new JTextField(15);
         chkIsAdvanced = new JCheckBox("Đặt phòng trước");
+        reservationButton = new JButton(" Xem lịch đặt phòng");
 
         // Buttons
-        btnConfirmBooking = new JButton("Xác nhận đặt phòng");
         btnCancel = new JButton("Hủy");
         btnCalculatePrice = new JButton("Tính giá");
-        btnAddService = new JButton("Thêm dịch vụ");
 
         // Style buttons
-        styleButton(btnConfirmBooking, CustomUI.lightGreen);
         styleButton(btnCancel, CustomUI.red);
         styleButton(btnCalculatePrice, CustomUI.lightBlue);
-        styleButton(btnAddService, new Color(255, 165, 0)); // Orange color for service button
-
-        // Initialize service components
-        initializeServiceComponents();
     }
 
     private void styleButton(JButton button, Color backgroundColor) {
@@ -130,40 +132,74 @@ public class BookingFormPanel extends JPanel {
         button.setForeground(Color.WHITE);
         button.setFont(CustomUI.normalFont);
         button.setFocusPainted(false);
-//        button.setBorder(BorderFactory.createRaisedBorderBorder());
         button.setPreferredSize(new Dimension(150, 40));
+        button.putClientProperty(FlatClientProperties.STYLE, " arc: 10");
     }
 
     private void setupLayout() {
-        // Main title
-        JLabel titleLabel = new JLabel("ĐẶT PHÒNG: " + selectedRoom.getRoomName(), SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
-        titleLabel.setForeground(CustomUI.darkBlue);
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        // Header panel
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setPreferredSize(new Dimension(0, 50));
+        headerPanel.putClientProperty(FlatClientProperties.STYLE, " arc: 20");
+        headerPanel.setBackground(CustomUI.blue);
+
+        // Title Panel
+        JPanel titlePanel = new JPanel();
+        titlePanel.setOpaque(false);
+
+        // Title with room name
+        JLabel titleLabel = new JLabel(selectedRoom.getRoomName(), SwingConstants.CENTER);
+        titleLabel.setFont(CustomUI.veryBigFont);
+        titleLabel.setForeground(CustomUI.white);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 150, 0, 150));
+
+        // Check-in and Check-out icons
+        ImageIcon checkinIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/checkin.png")));
+        checkinIcon = new ImageIcon(checkinIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH));
+        JButton checkInButton = new JButton(checkinIcon);
+
+        ImageIcon checkoutIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/leaving.png")));
+        checkoutIcon = new ImageIcon(checkoutIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH));
+        JButton checkoutButton = new JButton(checkoutIcon);
+
+        titlePanel.add(checkInButton);
+        titlePanel.add(titleLabel);
+        titlePanel.add(checkoutButton);
+
+        closeButton = new JButton("x");
+        closeButton.setFont(CustomUI.veryBigFont);
+        closeButton.setBackground(Color.RED);
+        closeButton.setForeground(Color.WHITE);
+        closeButton.setPreferredSize(new Dimension(60, 20));
+        closeButton.setFocusPainted(false);
+        closeButton.addActionListener(e -> Main.showCard("Quản lý đặt phòng"));
+        closeButton.putClientProperty(FlatClientProperties.STYLE, "arc: 20");
+
+        headerPanel.add(titlePanel, BorderLayout.CENTER);
+        headerPanel.add(closeButton, BorderLayout.EAST);
 
         // Create main content panel with overlay capability for service panel
         mainContentPanel = new JPanel();
         mainContentPanel.setLayout(new OverlayLayout(mainContentPanel));
-        mainContentPanel.setBackground(Color.WHITE);
+        mainContentPanel.setBackground(Color.white);
 
-        // Base content panel (your existing layout)
+        // Base content panel
         JPanel basePanel = createBaseContentPanel();
 
-        // Add both panels to main content
-        mainContentPanel.add(serviceSelectionPanel); // Service panel on top (initially hidden)
         mainContentPanel.add(basePanel); // Base content underneath
 
         // Create scroll pane for the entire main content
         JScrollPane mainScrollPane = new JScrollPane(mainContentPanel);
         mainScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        mainScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        mainScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         mainScrollPane.setBorder(null);
+
         // Set scroll speed
-        mainScrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        mainScrollPane.getVerticalScrollBar().setUnitIncrement(40);
         mainScrollPane.getViewport().setBackground(Color.WHITE);
 
         // Add to main panel
-        add(titleLabel, BorderLayout.NORTH);
+        add(headerPanel, BorderLayout.NORTH);
         add(mainScrollPane, BorderLayout.CENTER);
     }
 
@@ -183,17 +219,17 @@ public class BookingFormPanel extends JPanel {
         gbc.insets = new Insets(0, 0, 5, 5);
         contentPanel.add(bookingPanel, gbc);
 
-        // RIGHT COLUMN - Row 0 & 1: Tall room info panel (blue) - spans both left rows
-        JPanel rightRoomPanel = createRightRoomInfoPanel();
+        // Right Column - Row 0: Action menu panel (WHITE background)
+        JPanel actionMenu = createActionMenuPanel();
+        bookingPanel.setBackground(Color.WHITE);
         gbc.gridx = 1; gbc.gridy = 0;
         gbc.gridwidth = 1;
-        gbc.gridheight = 2; // Span 2 rows to be tall like your design
         gbc.fill = GridBagConstraints.BOTH;
-        gbc.weightx = 0.4; gbc.weighty = 1.0;
-        gbc.insets = new Insets(0, 5, 10, 0);
-        contentPanel.add(rightRoomPanel, gbc);
+        gbc.weightx = 0.4; gbc.weighty = 0.6; // More height for booking info
+        gbc.insets = new Insets(0, 5, 5, 5);
+        contentPanel.add(actionMenu, gbc);
 
-        // LEFT COLUMN - Row 1: Customer info panel (WHITE background) - SWAPPED TO BOTTOM with reduced height
+        // LEFT COLUMN - Row 1: Customer info panel (WHITE background)
         JPanel customerPanel = createCustomerInfoPanel();
         customerPanel.setBackground(Color.WHITE);
         gbc.gridx = 0; gbc.gridy = 1;
@@ -204,93 +240,337 @@ public class BookingFormPanel extends JPanel {
         gbc.insets = new Insets(5, 0, 10, 5);
         contentPanel.add(customerPanel, gbc);
 
-        // BOTTOM: Button panel (spans both columns)
-        JPanel buttonPanel = createButtonPanel();
-        gbc.gridx = 0; gbc.gridy = 2;
-        gbc.gridwidth = 2;
-        gbc.gridheight = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1.0; gbc.weighty = 0.0;
-        gbc.insets = new Insets(10, 0, 0, 0);
-        contentPanel.add(buttonPanel, gbc);
+        // RIGHT COLUMN - Row 1: Room info panel (WHITE background)
+        JPanel rightRoomPanel = createRoomInfoPanel();
+        gbc.gridx = 1; gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 0.4; gbc.weighty = 1;
+        gbc.insets = new Insets(5, 5, 10, 5);
+        contentPanel.add(rightRoomPanel, gbc);
 
         return contentPanel;
     }
 
-    private JPanel createRoomInfoPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(CustomUI.lightBlue);
-        panel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(CustomUI.darkBlue, 2),
-            "THÔNG TIN PHÒNG",
-            TitledBorder.CENTER,
-            TitledBorder.TOP,
-            CustomUI.normalFont,
-            Color.WHITE
-        ));
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(15, 25, 15, 25); // Increased padding for better spacing
-        gbc.anchor = GridBagConstraints.WEST;
-
-        // Left column with more spacing
-        addRoomInfoRowTwoColumns(panel, gbc, 0, 0, "Số phòng:", lblRoomNumber);
-        addRoomInfoRowTwoColumns(panel, gbc, 1, 0, "Sức chứa:", lblRoomCapacity);
-        addRoomInfoRowTwoColumns(panel, gbc, 2, 0, "Giá theo giờ:", lblHourlyPrice);
-
-        // Right column with proper spacing
-        addRoomInfoRowTwoColumns(panel, gbc, 0, 3, "Loại phòng:", lblRoomType);
-        addRoomInfoRowTwoColumns(panel, gbc, 1, 3, "Trạng thái:", lblRoomStatus);
-        addRoomInfoRowTwoColumns(panel, gbc, 2, 3, "Giá theo ngày:", lblDailyPrice);
-
-        return panel;
-    }
-
-    private void addRoomInfoRowTwoColumns(JPanel panel, GridBagConstraints gbc, int row, int startCol, String labelText, JLabel valueLabel) {
-        gbc.gridy = row;
-
-        gbc.gridx = startCol;
-        gbc.weightx = 0.0;
-        JLabel label = new JLabel(labelText);
-        label.setFont(CustomUI.normalFont);
-        label.setForeground(Color.WHITE);
-        panel.add(label, gbc);
-
-        gbc.gridx = startCol + 1;
-        gbc.weightx = 1.0;
-        gbc.insets = new Insets(15, 10, 15, 25); // Add space between label and value
-        valueLabel.setFont(CustomUI.normalFont);
-        valueLabel.setForeground(Color.WHITE);
-        panel.add(valueLabel, gbc);
-
-        // Reset insets for next iteration
-        gbc.insets = new Insets(15, 25, 15, 25);
-    }
-
     private JPanel createCustomerInfoPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(Color.WHITE);
-//        panel.setBackground(new Color(255, 255, 204)); // Light yellow
-        panel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(CustomUI.darkBlue, 2),
-            "THÔNG TIN KHÁCH HÀNG",
-            TitledBorder.CENTER,
-            TitledBorder.TOP,
-            CustomUI.normalFont,
-            CustomUI.darkBlue
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(Color.WHITE);
+
+        ImageIcon customerIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/customer.png")));
+        customerIcon = new ImageIcon(customerIcon.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
+
+        // Create collapsible header
+        JPanel headerPanel = createCollapsibleHeader(customerIcon, "THÔNG TIN KHÁCH HÀNG",
+            new Color(70, 130, 180), CustomUI.white, () -> {
+                isCustomerInfoCollapsed = !isCustomerInfoCollapsed;
+                togglePanelVisibility(customerInfoContent, isCustomerInfoCollapsed);
+            });
+
+        // Create content panel
+        customerInfoContent = new JPanel(new GridBagLayout());
+        customerInfoContent.setBackground(Color.WHITE);
+        customerInfoContent.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(70, 130, 180), 2),
+            BorderFactory.createEmptyBorder(15, 15, 15, 15)
         ));
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.insets = new Insets(8, 10, 8, 10);
         gbc.anchor = GridBagConstraints.WEST;
 
-        addFormRow(panel, gbc, 0, "Tên khách hàng:", txtCustomerName);
-        addFormRow(panel, gbc, 1, "Số điện thoại:", txtPhoneNumber);
-        addFormRow(panel, gbc, 2, "CCCD/CMND:", txtCCCD);
+        addFormRow(customerInfoContent, gbc, 0, "Tên khách hàng:", txtCustomerName);
+        addFormRow(customerInfoContent, gbc, 1, "Số điện thoại:", txtPhoneNumber);
+        addFormRow(customerInfoContent, gbc, 2, "CCCD/CMND:", txtCCCD);
 
-        return panel;
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        mainPanel.add(customerInfoContent, BorderLayout.CENTER);
+
+        return mainPanel;
     }
 
+    private JPanel createActionMenuPanel() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(Color.WHITE);
+
+        ImageIcon menuIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/booking.png")));
+        menuIcon = new ImageIcon(menuIcon.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
+
+        // Create collapsible header
+        JPanel headerPanel = createCollapsibleHeader(menuIcon, "BẢNG THAO TÁC",
+                                                     new Color(70, 130, 180), CustomUI.white, () -> {
+                    isActionMenuCollapsed = !isActionMenuCollapsed;
+                    togglePanelVisibility(actionMenuContent, isActionMenuCollapsed);
+                });
+
+        // Create content panel - flexible grid based on number of actions
+        actionMenuContent = new JPanel();
+        actionMenuContent.setBackground(Color.WHITE);
+        actionMenuContent.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(70, 130, 180), 2),
+                BorderFactory.createEmptyBorder(15, 15, 15, 15)
+        ));
+
+        // Populate action items based on room status
+        populateActionItems();
+
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        mainPanel.add(actionMenuContent, BorderLayout.CENTER);
+
+        return mainPanel;
+    }
+
+    private JPanel createBookingInfoPanel() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(Color.WHITE);
+
+        ImageIcon bookingIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/booking.png")));
+        bookingIcon = new ImageIcon(bookingIcon.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
+        // Create collapsible header
+        JPanel headerPanel = createCollapsibleHeader(bookingIcon, "THÔNG TIN ĐẶT PHÒNG",
+                                                     CustomUI.darkGreen, Color.WHITE, () -> {
+                    isBookingInfoCollapsed = !isBookingInfoCollapsed;
+                    togglePanelVisibility(bookingInfoContent, isBookingInfoCollapsed);
+                });
+
+        // Create content panel
+        bookingInfoContent = new JPanel(new GridBagLayout());
+        bookingInfoContent.setBackground(Color.WHITE);
+        bookingInfoContent.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(CustomUI.darkGreen, 2),
+                BorderFactory.createEmptyBorder(15, 15, 15, 15)
+        ));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 10, 8, 10);
+        gbc.anchor = GridBagConstraints.WEST;
+
+        // Single column layout as requested
+        addFormRow(bookingInfoContent, gbc, 0, "Ngày nhận phòng:", spnCheckInDate);
+        addFormRow(bookingInfoContent, gbc, 1, "Ngày trả phòng:", spnCheckOutDate);
+        addFormRow(bookingInfoContent, gbc, 2, "Giá ban đầu:", txtInitialPrice);
+        addFormRow(bookingInfoContent, gbc, 3, "Tiền đặt cọc:", txtDepositPrice);
+
+        // Advanced booking checkbox
+        gbc.gridx = 0; gbc.gridy = 4;
+        gbc.gridwidth = 1;
+        chkIsAdvanced.setFont(CustomUI.smallFont);
+        chkIsAdvanced.setBackground(Color.WHITE);
+        bookingInfoContent.add(chkIsAdvanced, gbc);
+
+        // Reservation button
+        gbc.gridx = 1; gbc.gridy = 4;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        reservationButton.setFont(CustomUI.smallFont);
+        reservationButton.setForeground(CustomUI.white);
+        reservationButton.setBackground(CustomUI.purple);
+
+        // Add calendar icon to reservation button
+        ImageIcon calendar = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/calendar.png")));
+        calendar = new ImageIcon(calendar.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH));
+        reservationButton.setIcon(calendar);
+
+        bookingInfoContent.add(reservationButton, gbc);
+
+        // Note area
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.gridwidth = 2;
+        JLabel lblNote = new JLabel("Ghi chú:");
+        lblNote.setFont(CustomUI.smallFont);
+        bookingInfoContent.add(lblNote, gbc);
+
+        gbc.gridy = 6;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 1.0;
+        JTextArea txtNote = new JTextArea();
+        txtNote.setPreferredSize(new Dimension(300, 100));
+        txtNote.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+        bookingInfoContent.add(txtNote, gbc);
+
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        mainPanel.add(bookingInfoContent, BorderLayout.CENTER);
+
+        return mainPanel;
+    }
+
+    private JPanel createRoomInfoPanel() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(Color.WHITE);
+
+        ImageIcon roomIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/room.png")));
+        roomIcon = new ImageIcon(roomIcon.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
+
+        // Create collapsible header
+        JPanel headerPanel = createCollapsibleHeader(roomIcon, "THÔNG TIN PHÒNG",
+                                                     CustomUI.orange, Color.WHITE, () -> {
+                    isRoomInfoCollapsed = !isRoomInfoCollapsed;
+                    togglePanelVisibility(roomInfoContent, isRoomInfoCollapsed);
+                });
+
+        // Create content panel with proper overflow handling
+        roomInfoContent = new JPanel(new GridBagLayout());
+        roomInfoContent.setBackground(Color.WHITE);
+        roomInfoContent.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(CustomUI.orange, 2),
+                BorderFactory.createEmptyBorder(10, 15, 10, 15)
+        ));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 10, 8, 10);
+        gbc.anchor = GridBagConstraints.WEST;
+
+        // Essential room information using addFormRow for consistency
+        addFormRow(roomInfoContent, gbc, 0, "Số phòng:", lblRoomNumber);
+        addFormRow(roomInfoContent, gbc, 1, "Loại phòng:", lblRoomType);
+        addFormRow(roomInfoContent, gbc, 2, "Sức chứa:", lblRoomCapacity);
+        addFormRow(roomInfoContent, gbc, 3, "Trạng thái:", lblRoomStatus);
+        addFormRow(roomInfoContent, gbc, 4, "Giá theo giờ:", lblHourlyPrice);
+        addFormRow(roomInfoContent, gbc, 5, "Giá theo ngày:", lblDailyPrice);
+
+        // Additional info section with separator - flexible content based on room status
+        gbc.gridy = 6;
+        gbc.gridwidth = 2;
+        gbc.insets = new Insets(15, 10, 8, 10);
+        JSeparator separator = new JSeparator();
+        separator.setForeground(Color.GRAY);
+        roomInfoContent.add(separator, gbc);
+
+        // Reset for additional fields
+        gbc.insets = new Insets(8, 10, 8, 10);
+        gbc.gridwidth = 1;
+
+        // Create additional info labels - these will be flexible based on room status
+        JLabel lblRoomId = new JLabel(selectedRoom.getRoomId());
+        JLabel lblAmenities = new JLabel(getAmenitiesForRoom());
+        JLabel lblArea = new JLabel(getAreaForRoom());
+        JLabel lblFloor = new JLabel("Tầng " + extractFloorFromRoomName());
+
+        // Add flexible additional information using addFormRow
+        addFormRow(roomInfoContent, gbc, 7, "Mã phòng:", lblRoomId);
+        addFormRow(roomInfoContent, gbc, 8, "Tiện nghi:", lblAmenities);
+        addFormRow(roomInfoContent, gbc, 9, "Diện tích:", lblArea);
+        addFormRow(roomInfoContent, gbc, 10, "Tầng:", lblFloor);
+
+        // Add status-specific information if needed
+        addStatusSpecificInfo(roomInfoContent, gbc);
+
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        mainPanel.add(roomInfoContent, BorderLayout.CENTER);
+
+        return mainPanel;
+    }
+
+    private JButton createActionButton(ActionItem item) {
+        JButton button = new JButton();
+        button.setLayout(new BorderLayout());
+        button.setBackground(item.backgroundColor);
+        button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createRaisedBevelBorder(),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Icon label - now using ImageIcon instead of emoji string
+        JLabel iconLabel = new JLabel(item.icon, SwingConstants.CENTER);
+        iconLabel.setOpaque(false);
+
+        // Text label
+        JLabel textLabel = new JLabel(item.text, SwingConstants.CENTER);
+        textLabel.setFont(CustomUI.normalFont);
+        textLabel.setForeground(Color.WHITE);
+        textLabel.setOpaque(false);
+
+        button.add(iconLabel, BorderLayout.CENTER);
+        button.add(textLabel, BorderLayout.SOUTH);
+
+        // Add hover effects
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(item.backgroundColor.brighter());
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(item.backgroundColor);
+            }
+        });
+
+        // Add click action
+        button.addActionListener(e -> item.action.run());
+
+        return button;
+    }
+
+    private void populateActionItems() {
+        actionMenuContent.removeAll(); // Clear existing items
+
+        String roomStatus = selectedRoom.getRoomStatus();
+        java.util.List<ActionItem> actionItems = getActionItemsForStatus(roomStatus);
+
+        // Set grid layout based on number of items
+        int itemCount = actionItems.size();
+        int cols = itemCount <= 2 ? itemCount : 2; // Max 2 columns
+        int rows = (int) Math.ceil((double) itemCount / 2);
+        actionMenuContent.setLayout(new GridLayout(rows, cols, 10, 10));
+
+        // Create and add action buttons
+        for (ActionItem item : actionItems) {
+            JButton actionButton = createActionButton(item);
+            actionMenuContent.add(actionButton);
+        }
+
+        // Refresh the panel
+        actionMenuContent.revalidate();
+        actionMenuContent.repaint();
+    }
+
+    // Get action items based on room status
+    private List<ActionItem> getActionItemsForStatus(String roomStatus) {
+        java.util.List<ActionItem> items = new java.util.ArrayList<>();
+
+        ActionItem callServiceItem = new ActionItem("Gọi Dịch Vụ", IconUtil.createServiceIcon(), CustomUI.bluePurple, this::handleCallService);
+        ActionItem bookRoomItem = new ActionItem("Đặt Phòng", IconUtil.createBookingIcon(), CustomUI.bluePurple, this::handleBookRoom);
+        ActionItem checkOutItem = new ActionItem("Trả Phòng", IconUtil.createCheckOutIcon(), CustomUI.bluePurple, this::handleCheckOut);
+        ActionItem transferRoomItem = new ActionItem("Chuyển Phòng", IconUtil.createTransferIcon(), CustomUI.bluePurple, this::handleTransferRoom);
+        ActionItem extendBookingItem = new ActionItem("Book Thêm Giờ", IconUtil.createExtendIcon(), CustomUI.bluePurple, this::handleExtendBooking);
+        ActionItem cancelReservationItem = new ActionItem("Hủy Đặt Phòng", IconUtil.createCancelIcon(), CustomUI.red, this::handleCancelReservation);
+
+        ActionItem checkInItem = new ActionItem("Nhận Phòng", IconUtil.createCheckInIcon(), CustomUI.bluePurple, this::handleCheckIn);
+        if ("Còn Trống".equalsIgnoreCase(roomStatus) || "Đang hoạt động".equalsIgnoreCase(roomStatus)) {
+            items.add(callServiceItem);
+            items.add(bookRoomItem);
+        }
+        else if ("Đang sử dụng".equalsIgnoreCase(roomStatus)) {
+            items.add(callServiceItem);
+            items.add(checkOutItem);
+            items.add(transferRoomItem);
+            items.add(extendBookingItem);
+        }
+        else if ("Bảo trì".equalsIgnoreCase(roomStatus) || "Maintenance".equalsIgnoreCase(roomStatus)) {
+            items.add(new ActionItem("Hoàn Thành Bảo Trì", IconUtil.createCompleteIcon(), CustomUI.lightBlue, this::handleCompleteMaintenance));
+            items.add(new ActionItem("Cập Nhật Tiến Độ", IconUtil.createProgressIcon(), CustomUI.lightBlue, this::handleUpdateProgress));
+        }
+        else if ("Dọn dẹp".equalsIgnoreCase(roomStatus) || "Cleaning".equalsIgnoreCase(roomStatus)) {
+            items.add(new ActionItem("Hoàn Thành Dọn Dẹp", IconUtil.createCompleteIcon(), CustomUI.lightBlue, this::handleCompleteCleaning));
+        }
+        else if ("Đã đặt".equalsIgnoreCase(roomStatus) || "Reserved".equalsIgnoreCase(roomStatus)) {
+            items.add(checkInItem);
+            items.add(cancelReservationItem);
+//            items.add(new ActionItem("Sửa Đặt Phòng", createEditIcon(), CustomUI.lightBlue, this::handleEditReservation));
+        } else {
+            items.add(callServiceItem);
+            items.add(checkOutItem);
+            items.add(transferRoomItem);
+            items.add(extendBookingItem);
+        }
+
+        return items;
+    }
+
+    // Helper class add row to form panels
     private void addFormRow(JPanel panel, GridBagConstraints gbc, int row, String labelText, JComponent component) {
         gbc.gridy = row;
         gbc.gridwidth = 1;
@@ -307,116 +587,191 @@ public class BookingFormPanel extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         component.setFont(CustomUI.smallFont);
         if (component instanceof JTextField) {
-            component.setPreferredSize(new Dimension(400, 35)); // Much larger text fields
-            component.setMinimumSize(new Dimension(350, 35)); // Ensure minimum size
+            component.setPreferredSize(new Dimension(300, 35));
+            component.setMinimumSize(new Dimension(250, 35));
         } else if (component instanceof JSpinner) {
-            component.setPreferredSize(new Dimension(300, 35)); // Larger spinners too
+            component.setPreferredSize(new Dimension(300, 35));
             component.setMinimumSize(new Dimension(250, 35));
         }
         panel.add(component, gbc);
     }
 
-    private JPanel createBookingInfoPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(CustomUI.darkBlue, 2),
-            "THÔNG TIN ĐẶT PHÒNG",
-            TitledBorder.CENTER,
-            TitledBorder.TOP,
-            CustomUI.normalFont,
-            CustomUI.darkBlue
+    // Create a collapsible header panel
+    private JPanel createCollapsibleHeader(ImageIcon icon, String title, Color backgroundColor, Color textColor, Runnable toggleAction) {
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(backgroundColor);
+        headerPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(backgroundColor.darker(), 2),
+            BorderFactory.createEmptyBorder(8, 15, 8, 15)
         ));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.anchor = GridBagConstraints.WEST;
 
-        // Add column
-        addFormRow(panel, gbc, 0, "Ngày nhận phòng:", spnCheckInDate);
-        addFormRow(panel, gbc, 1, "Ngày trả phòng:", spnCheckOutDate);
-        addFormRow(panel, gbc, 2, "Giá ban đầu:", txtInitialPrice);
-        addFormRow(panel, gbc, 3, "Tiền đặt cọc:", txtDepositPrice);
+        // Title label with text-based icon for better compatibility
+        JLabel titleLabel = new JLabel(title, icon, SwingConstants.LEFT);
+        titleLabel.setFont(CustomUI.normalFont);
+        titleLabel.setForeground(textColor);
 
-        // Advanced booking checkbox
-        gbc.gridx = 0; gbc.gridy = 4;
-        gbc.gridwidth = 2;
-        chkIsAdvanced.setFont(CustomUI.smallFont);
-        chkIsAdvanced.setBackground(Color.WHITE);
-        panel.add(chkIsAdvanced, gbc);
+        // Dropdown arrow button
+        JButton dropdownButton = new JButton("▼");
+        dropdownButton.setFont(new Font("Arial", Font.BOLD, 12));
+        dropdownButton.setForeground(textColor);
+        dropdownButton.setBackground(backgroundColor);
+        dropdownButton.setBorder(BorderFactory.createEmptyBorder());
+        dropdownButton.setFocusPainted(false);
+        dropdownButton.setPreferredSize(new Dimension(30, 25));
 
-        // Note area
-        gbc.gridy = 5;
-        JLabel lblNote = new JLabel("Ghi chú:");
-        lblNote.setFont(CustomUI.smallFont);
-        panel.add(lblNote, gbc);
+        // Add hover effect
+        dropdownButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                dropdownButton.setBackground(backgroundColor.brighter());
+            }
 
-        gbc.gridy = 6;
-        gbc.fill = GridBagConstraints.BOTH;
-        JScrollPane scrollNote = new JScrollPane(txtNote);
-        scrollNote.setPreferredSize(new Dimension(250, 80));
-        panel.add(scrollNote, gbc);
+            @Override
+            public void mouseExited(MouseEvent e) {
+                dropdownButton.setBackground(backgroundColor);
+            }
+        });
 
-        return panel;
+        // Toggle action with specific panel tracking
+        ActionListener toggleListener = e -> {
+            toggleAction.run();
+            // Update arrow direction based on the specific panel's collapse state
+            if (title.contains("KHÁCH HÀNG")) {
+                dropdownButton.setText(isCustomerInfoCollapsed ? "►" : "▼");
+            }
+            else if (title.contains("ĐẶT PHÒNG")) {
+                dropdownButton.setText(isBookingInfoCollapsed ? "►" : "▼");
+            }
+            else if (title.contains("THÔNG TIN PHÒNG")) {
+                dropdownButton.setText(isRoomInfoCollapsed ? "►" : "▼");
+            } else if (title.contains("BẢNG THAO TÁC")) {
+                dropdownButton.setText(isActionMenuCollapsed ? "►" : "▼");
+            }
+        };
+
+        dropdownButton.addActionListener(toggleListener);
+
+        // Make the entire header clickable
+        headerPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                toggleListener.actionPerformed(null);
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                headerPanel.setBackground(backgroundColor.brighter());
+                dropdownButton.setBackground(backgroundColor.brighter());
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                headerPanel.setBackground(backgroundColor);
+                dropdownButton.setBackground(backgroundColor);
+            }
+        });
+
+        headerPanel.add(titleLabel, BorderLayout.WEST);
+        headerPanel.add(dropdownButton, BorderLayout.EAST);
+
+        return headerPanel;
     }
 
-
-    private JPanel createButtonPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(Color.WHITE);
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(0, 10, 0, 10);
-
-        // Left: THÊM DỊCH VỤ button (cyan)
-        gbc.gridx = 0;
-        gbc.anchor = GridBagConstraints.WEST;
-        btnAddService.setText("THÊM DỊCH VỤ");
-        btnAddService.setBackground(new Color(0, 206, 209)); // Cyan
-        btnAddService.setPreferredSize(new Dimension(200, 50));
-        panel.add(btnAddService, gbc);
-
-        // Right: XÁC NHẬN button (green)
-        gbc.gridx = 1;
-        gbc.anchor = GridBagConstraints.EAST;
-        btnConfirmBooking.setText("XÁC NHẬN");
-        btnConfirmBooking.setBackground(CustomUI.lightGreen);
-        btnConfirmBooking.setPreferredSize(new Dimension(200, 50));
-        panel.add(btnConfirmBooking, gbc);
-
-        return panel;
+    private void togglePanelVisibility(JPanel contentPanel, boolean isCollapsed) {
+        if (contentPanel != null) {
+            contentPanel.setVisible(!isCollapsed);
+            // Animate the collapse/expand
+            SwingUtilities.invokeLater(() -> {
+                mainContentPanel.revalidate();
+                mainContentPanel.repaint();
+            });
+        }
     }
 
-    private void setupEventHandlers() {
-        btnConfirmBooking.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                handleConfirmBooking();
-            }
-        });
-
-        btnCancel.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                handleCancel();
-            }
-        });
-
-        btnCalculatePrice.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                calculatePrice();
-            }
-        });
-
-        btnAddService.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                toggleServicePanel();
-            }
-        });
+    // Helper methods for additional room info
+    private String extractFloorFromRoomName() {
+        String roomName = selectedRoom.getRoomName();
+        // Assuming room name format is like "101", "202A", etc.
+        if (roomName.length() >= 3 && Character.isDigit(roomName.charAt(0))) {
+            return String.valueOf(roomName.charAt(0));
+        }
+        return "N/A";
     }
 
+    private String getAmenitiesForRoom() {
+        // This can be made flexible based on room type or category
+        String roomType = selectedRoom.getRoomType();
+        if (roomType.toLowerCase().contains("vip") || roomType.toLowerCase().contains("deluxe")) {
+            return "Điều hòa, TV, WiFi, Minibar, Jacuzzi";
+        } else if (roomType.toLowerCase().contains("standard")) {
+            return "Điều hòa, TV, WiFi";
+        } else {
+            return "Điều hòa, TV, WiFi, Tủ lạnh";
+        }
+    }
+
+    private String getAreaForRoom() {
+        // This can be made flexible based on room type or actual room data
+        String roomType = selectedRoom.getRoomType();
+        if (roomType.toLowerCase().contains("vip") || roomType.toLowerCase().contains("deluxe")) {
+            return "45m²";
+        } else if (roomType.toLowerCase().contains("standard")) {
+            return "25m²";
+        } else {
+            return "30m²";
+        }
+    }
+
+    private String getCurrentTimeString() {
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("HH:mm - dd/MM/yyyy");
+        return sdf.format(new java.util.Date());
+    }
+
+    // Method to add status-specific information dynamically
+    private void addStatusSpecificInfo(JPanel panel, GridBagConstraints gbc) {
+        String roomStatus = selectedRoom.getRoomStatus();
+        int currentRow = 11;
+
+        if ("OCCUPIED".equalsIgnoreCase(roomStatus)) {
+            // Add check-in time, expected checkout, etc.
+            JLabel lblCheckInTime = new JLabel("14:00 - 25/09/2024");
+            JLabel lblExpectedCheckout = new JLabel("12:00 - 27/09/2024");
+
+            addFormRow(panel, gbc, currentRow++, "Giờ nhận phòng:", lblCheckInTime);
+            addFormRow(panel, gbc, currentRow++, "Dự kiến trả:", lblExpectedCheckout);
+
+        } else if ("MAINTENANCE".equalsIgnoreCase(roomStatus)) {
+            // Add maintenance information
+            JLabel lblMaintenanceType = new JLabel("Bảo trì định kỳ");
+            JLabel lblEstimatedCompletion = new JLabel("28/09/2024");
+
+            addFormRow(panel, gbc, currentRow++, "Loại bảo trì:", lblMaintenanceType);
+            addFormRow(panel, gbc, currentRow++, "Dự kiến xong:", lblEstimatedCompletion);
+
+        } else if ("RESERVED".equalsIgnoreCase(roomStatus)) {
+            // Add reservation information
+            JLabel lblReservationTime = new JLabel("15:00 - 27/09/2024");
+            JLabel lblCustomerName = new JLabel("Đã đặt trước");
+
+            addFormRow(panel, gbc, currentRow++, "Giờ nhận phòng:", lblReservationTime);
+            addFormRow(panel, gbc, currentRow++, "Trạng thái:", lblCustomerName);
+
+        } else if ("CLEANING".equalsIgnoreCase(roomStatus)) {
+            // Add cleaning information
+            JLabel lblCleaningStatus = new JLabel("Đang dọn dẹp");
+            JLabel lblEstimatedReady = new JLabel("30 phút");
+
+            addFormRow(panel, gbc, currentRow++, "Trạng thái:", lblCleaningStatus);
+            addFormRow(panel, gbc, currentRow++, "Còn lại:", lblEstimatedReady);
+        }
+
+        // Add last updated time for all statuses
+        JLabel lblLastUpdated = new JLabel(getCurrentTimeString());
+        addFormRow(panel, gbc, currentRow, "Cập nhật lúc:", lblLastUpdated);
+    }
+
+    // Populate room information
     private void populateRoomInformation() {
         lblRoomNumber.setText(selectedRoom.getRoomName());
         lblRoomType.setText(selectedRoom.getRoomType());
@@ -530,9 +885,8 @@ public class BookingFormPanel extends JPanel {
             return false;
         }
 
-        java.sql.Timestamp checkIn = (java.sql.Timestamp) spnCheckInDate.getValue();
-        java.sql.Timestamp checkOut = (java.sql.Timestamp) spnCheckOutDate.getValue();
-        java.sql.Timestamp createAt = (java.sql.Timestamp) spnCreateAt.getValue();
+        java.util.Date checkIn = (java.util.Date) spnCheckInDate.getValue();
+        java.util.Date checkOut = (java.util.Date) spnCheckOutDate.getValue();
 
         if (checkOut.before(checkIn)) {
             JOptionPane.showMessageDialog(this, "Ngày trả phòng phải sau ngày nhận phòng!",
@@ -543,366 +897,135 @@ public class BookingFormPanel extends JPanel {
         return true;
     }
 
+    // Create booking event from form data
     private BookingCreationEvent createBookingEvent() {
         String customerName = txtCustomerName.getText().trim();
         String phoneNumber = txtPhoneNumber.getText().trim();
         String cccd = txtCCCD.getText().trim();
-        Timestamp reserveDate = new Timestamp(System.currentTimeMillis());
+        java.sql.Timestamp reserveDate = new java.sql.Timestamp(System.currentTimeMillis());
         String note = txtNote.getText().trim();
-        Timestamp checkInDate = new Timestamp(((java.sql.Timestamp) spnCheckInDate.getValue()).getTime());
-        Timestamp checkOutDate = new Timestamp(((java.sql.Timestamp) spnCheckOutDate.getValue()).getTime());
-        Timestamp createAt = new Timestamp(((java.sql.Timestamp) spnCreateAt.getValue()).getTime());
+        java.sql.Timestamp checkInDate = new java.sql.Timestamp(((java.util.Date) spnCheckInDate.getValue()).getTime());
+        java.sql.Timestamp checkOutDate = new java.sql.Timestamp(((java.util.Date) spnCheckOutDate.getValue()).getTime());
+        java.sql.Timestamp createAt = new java.sql.Timestamp(System.currentTimeMillis());
         double initialPrice = Double.parseDouble(txtInitialPrice.getText());
         double depositPrice = Double.parseDouble(txtDepositPrice.getText());
         boolean isAdvanced = chkIsAdvanced.isSelected();
-        List<String> roomIds = Arrays.asList(selectedRoom.getRoomId());
-        List<String> serviceIds = Arrays.asList(); // Empty for now
-        String shiftAssignmentId = "SHIFT001"; // You may need to get this from current session
+        java.util.List<String> roomIds = java.util.Arrays.asList(selectedRoom.getRoomId());
+        java.util.List<String> serviceIds = java.util.Arrays.asList(); // Empty for now
+        String shiftAssignmentId = "SA0000001"; // TODO - get actual shift assignment ID
 
         return new BookingCreationEvent(customerName, phoneNumber, cccd, reserveDate, note,
                 checkInDate, checkOutDate, initialPrice, depositPrice, isAdvanced,
                 roomIds, serviceIds, shiftAssignmentId, createAt, false);
     }
 
-    private void handleCancel() {
-        // Return to the previous panel - you may need to adjust this based on your navigation system
-        Container parent = this.getParent();
-        if (parent instanceof JPanel) {
-            CardLayout layout = (CardLayout) parent.getLayout();
-            layout.previous(parent);
-        }
+    // Setup event handlers for buttons
+    private void setupEventHandlers() {
+        btnCancel.addActionListener(e -> handleCancel());
+        btnCalculatePrice.addActionListener(e -> calculatePrice());
+        closeButton.addActionListener(e -> Main.showCard("Quản lý đặt phòng"));
     }
 
-    private void toggleServicePanel() {
-        isServicePanelVisible = !isServicePanelVisible;
-        serviceSelectionPanel.setVisible(isServicePanelVisible);
+    // Handler methods for action buttons
+    private void handleCallService() {
+        // Create and show the service selection dialog
+        ServiceSelectionDialog dialog = new ServiceSelectionDialog(
+                (Frame) SwingUtilities.getWindowAncestor(this),
+                (services) -> {
+                    // Update the selected services when dialog confirms
+                    selectedServices.clear();
+                    selectedServices.addAll(services);
 
-        if (isServicePanelVisible) {
-            // Make the overlay panel fill the entire main content area
-            serviceSelectionPanel.setBounds(0, 0, mainContentPanel.getWidth(), mainContentPanel.getHeight());
-
-            // Center the service dialog within the overlay
-            Component serviceDialog = serviceSelectionPanel.getComponent(0);
-            int x = (mainContentPanel.getWidth() - serviceDialog.getWidth()) / 2;
-            int y = (mainContentPanel.getHeight() - serviceDialog.getHeight()) / 2;
-            serviceDialog.setLocation(x, y);
-
-            mainContentPanel.setComponentZOrder(serviceSelectionPanel, 0); // Bring to front
-        }
-
-        mainContentPanel.revalidate();
-        mainContentPanel.repaint();
-    }
-
-    private JPanel createRightRoomInfoPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(CustomUI.lightBlue);
-        panel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(CustomUI.darkBlue, 2),
-            "THÔNG TIN PHÒNG",
-            TitledBorder.CENTER,
-            TitledBorder.TOP,
-            CustomUI.normalFont,
-            Color.WHITE
-        ));
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 15, 8, 15); // Reduced padding to prevent overflow
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        // Essential room information only - reduced content to prevent overflow
-        addRoomInfoRowSingleColumn(panel, gbc, 0, "Số phòng:", lblRoomNumber);
-        addRoomInfoRowSingleColumn(panel, gbc, 1, "Loại phòng:", lblRoomType);
-        addRoomInfoRowSingleColumn(panel, gbc, 2, "Sức chứa:", lblRoomCapacity);
-        addRoomInfoRowSingleColumn(panel, gbc, 3, "Trạng thái:", lblRoomStatus);
-        addRoomInfoRowSingleColumn(panel, gbc, 4, "Giá theo giờ:", lblHourlyPrice);
-        addRoomInfoRowSingleColumn(panel, gbc, 5, "Giá theo ngày:", lblDailyPrice);
-        
-        // Add some spacing before additional info with smaller font
-        gbc.gridy = 6;
-        gbc.gridwidth = 2;
-        gbc.insets = new Insets(15, 15, 8, 15);
-        JLabel lblAdditionalInfo = new JLabel("Thông tin bổ sung:");
-        lblAdditionalInfo.setFont(new Font(CustomUI.normalFont.getName(), Font.BOLD, CustomUI.normalFont.getSize() - 1)); // Smaller font
-        lblAdditionalInfo.setForeground(Color.WHITE);
-        panel.add(lblAdditionalInfo, gbc);
-        
-        // Reset insets and add compact additional info
-        gbc.insets = new Insets(5, 15, 5, 15); // Smaller spacing
-        gbc.gridwidth = 1;
-
-        // Create compact labels for additional info
-        JLabel lblRoomId = new JLabel(selectedRoom.getRoomId());
-        lblRoomId.setFont(new Font(CustomUI.normalFont.getName(), Font.PLAIN, CustomUI.normalFont.getSize() - 1));
-
-        JLabel lblAmenities = new JLabel("Điều hòa, TV, WiFi");
-        lblAmenities.setFont(new Font(CustomUI.normalFont.getName(), Font.PLAIN, CustomUI.normalFont.getSize() - 1));
-
-        JLabel lblArea = new JLabel("25m²");
-        lblArea.setFont(new Font(CustomUI.normalFont.getName(), Font.PLAIN, CustomUI.normalFont.getSize() - 1));
-
-        JLabel lblFloor = new JLabel("Tầng " + extractFloorFromRoomName());
-        lblFloor.setFont(new Font(CustomUI.normalFont.getName(), Font.PLAIN, CustomUI.normalFont.getSize() - 1));
-
-        addRoomInfoRowSingleColumn(panel, gbc, 7, "Mã phòng:", lblRoomId);
-        addRoomInfoRowSingleColumn(panel, gbc, 8, "Tiện nghi:", lblAmenities);
-        addRoomInfoRowSingleColumn(panel, gbc, 9, "Diện tích:", lblArea);
-        addRoomInfoRowSingleColumn(panel, gbc, 10, "Tầng:", lblFloor);
-
-        return panel;
-    }
-
-    private void addRoomInfoRowSingleColumn(JPanel panel, GridBagConstraints gbc, int row, String labelText, JLabel valueLabel) {
-        gbc.gridy = row;
-
-        gbc.gridx = 0;
-        gbc.weightx = 0.0;
-        gbc.fill = GridBagConstraints.NONE;
-        JLabel label = new JLabel(labelText);
-        label.setFont(new Font(CustomUI.normalFont.getName(), Font.PLAIN, CustomUI.normalFont.getSize() - 1)); // Smaller font
-        label.setForeground(Color.WHITE);
-        panel.add(label, gbc);
-
-        gbc.gridx = 1;
-        gbc.weightx = 1.0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        valueLabel.setFont(new Font(CustomUI.normalFont.getName(), Font.PLAIN, CustomUI.normalFont.getSize() - 1)); // Smaller font
-        valueLabel.setForeground(Color.WHITE);
-        panel.add(valueLabel, gbc);
-    }
-
-    private String extractFloorFromRoomName() {
-        // Extract floor number from room name (e.g., "101" -> "1", "205" -> "2")
-        String roomName = selectedRoom.getRoomName();
-        if (roomName != null && roomName.length() >= 2) {
-            return roomName.substring(0, 1);
-        }
-        return "1";
-    }
-    
-    private void initializeServiceComponents() {
-        // Create a full-screen overlay panel that blocks all interactions
-        serviceSelectionPanel = new JPanel();
-        serviceSelectionPanel.setLayout(null); // Use null layout for absolute positioning
-        serviceSelectionPanel.setBackground(new Color(0, 0, 0, 100)); // Semi-transparent black overlay
-        serviceSelectionPanel.setVisible(false);
-        serviceSelectionPanel.setOpaque(false);
-
-        // Add mouse listeners to consume all mouse events and prevent them from reaching underlying components
-        serviceSelectionPanel.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                // Consume the event to prevent it from reaching underlying components
-                e.consume();
-            }
-
-            @Override
-            public void mousePressed(java.awt.event.MouseEvent e) {
-                e.consume();
-            }
-
-            @Override
-            public void mouseReleased(java.awt.event.MouseEvent e) {
-                e.consume();
-            }
-        });
-
-        serviceSelectionPanel.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
-            @Override
-            public void mouseMoved(java.awt.event.MouseEvent e) {
-                e.consume();
-            }
-
-            @Override
-            public void mouseDragged(java.awt.event.MouseEvent e) {
-                e.consume();
-            }
-        });
-
-        // Create the actual service dialog panel
-        JPanel serviceDialog = new JPanel(new BorderLayout());
-        serviceDialog.setBackground(new Color(255, 255, 204)); // Light yellow background like your design
-        serviceDialog.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-        serviceDialog.setSize(600, 500);
-
-        // Header panel with title and close button
-        JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(new Color(255, 255, 204));
-
-        JLabel titleLabel = new JLabel("GỌI DỊCH VỤ", SwingConstants.CENTER);
-        titleLabel.setFont(new Font(CustomUI.normalFont.getName(), Font.BOLD, 16));
-        titleLabel.setForeground(Color.BLACK);
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-
-        // Close button (X)
-        JButton closeButton = new JButton("✕");
-        closeButton.setFont(new Font("Arial", Font.BOLD, 16));
-        closeButton.setBackground(Color.RED);
-        closeButton.setForeground(Color.WHITE);
-        closeButton.setPreferredSize(new Dimension(30, 30));
-        closeButton.setFocusPainted(false);
-        closeButton.setBorder(BorderFactory.createEmptyBorder());
-        closeButton.addActionListener(e -> toggleServicePanel());
-
-        headerPanel.add(titleLabel, BorderLayout.CENTER);
-        headerPanel.add(closeButton, BorderLayout.EAST);
-
-        // Main content panel
-        JPanel contentPanel = new JPanel(new GridBagLayout());
-        contentPanel.setBackground(new Color(255, 255, 204));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 15, 10, 15);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        // Search field at the top
-        txtSearchService = new JTextField("Tìm kiếm");
-        txtSearchService.setPreferredSize(new Dimension(350, 40)); // Made larger
-        txtSearchService.setFont(CustomUI.normalFont);
-        txtSearchService.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-        gbc.gridx = 0; gbc.gridy = 0;
-        gbc.weightx = 1.0;
-        contentPanel.add(txtSearchService, gbc);
-
-        // Service list panel
-        serviceListPanel = new JPanel();
-        serviceListPanel.setLayout(new BoxLayout(serviceListPanel, BoxLayout.Y_AXIS));
-        serviceListPanel.setBackground(new Color(255, 255, 204));
-
-        // Add sample services with larger size
-        addServiceItem("Phần Ăn Sáng", "100.000");
-        addServiceItem("Gọi xe đưa đón", "50.000");
-        addServiceItem("Massage", "200.000");
-        addServiceItem("Giặt ủi", "30.000");
-        addServiceItem("<NAME>", "<MONEY>");
-
-        JScrollPane serviceScrollPane = new JScrollPane(serviceListPanel);
-        serviceScrollPane.setPreferredSize(new Dimension(350, 250)); // Made larger
-        serviceScrollPane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-        serviceScrollPane.setBackground(new Color(255, 255, 204));
-        gbc.gridy = 1;
-        gbc.weighty = 1.0;
-        gbc.fill = GridBagConstraints.BOTH;
-        contentPanel.add(serviceScrollPane, gbc);
-
-        // Total cost label
-        lblTotalServiceCost = new JLabel("Tổng tiền:                                        <Total>");
-        lblTotalServiceCost.setFont(CustomUI.normalFont);
-        lblTotalServiceCost.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-        lblTotalServiceCost.setPreferredSize(new Dimension(350, 40)); // Made larger
-        lblTotalServiceCost.setOpaque(true);
-        lblTotalServiceCost.setBackground(Color.WHITE);
-        gbc.gridy = 2;
-        gbc.weighty = 0.0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        contentPanel.add(lblTotalServiceCost, gbc);
-
-        // Confirm button
-        JButton btnConfirmService = new JButton("XÁC NHẬN");
-        btnConfirmService.setBackground(new Color(144, 238, 144)); // Light green
-        btnConfirmService.setForeground(Color.WHITE);
-        btnConfirmService.setFont(CustomUI.normalFont);
-        btnConfirmService.setPreferredSize(new Dimension(350, 50)); // Made larger
-        btnConfirmService.addActionListener(e -> confirmServiceSelection());
-        gbc.gridy = 3;
-        contentPanel.add(btnConfirmService, gbc);
-
-        serviceDialog.add(headerPanel, BorderLayout.NORTH);
-        serviceDialog.add(contentPanel, BorderLayout.CENTER);
-
-        // Add the service dialog to the overlay panel
-        serviceSelectionPanel.add(serviceDialog);
-    }
-
-    private void addServiceItem(String serviceName, String price) {
-        JPanel serviceItem = new JPanel(new BorderLayout());
-        serviceItem.setBackground(Color.WHITE);
-        serviceItem.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-        serviceItem.setPreferredSize(new Dimension(350, 45));
-
-        JLabel nameLabel = new JLabel(serviceName);
-        nameLabel.setFont(CustomUI.normalFont);
-        nameLabel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15)); // More padding
-
-        JLabel priceLabel = new JLabel(price);
-        priceLabel.setFont(CustomUI.normalFont);
-        priceLabel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15)); // More padding
-        priceLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-
-        serviceItem.add(nameLabel, BorderLayout.WEST);
-        serviceItem.add(priceLabel, BorderLayout.EAST);
-
-        // Add click functionality
-        serviceItem.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                if (!serviceName.equals("<NAME>")) {
-                    selectService(serviceName, price);
+                    // Show confirmation message
+                    if (!services.isEmpty()) {
+                        JOptionPane.showMessageDialog(this,
+                                                      "Đã chọn " + services.size() + " dịch vụ",
+                                                      "Xác nhận", JOptionPane.INFORMATION_MESSAGE);
+                    }
                 }
-            }
-
-            @Override
-            public void mouseEntered(java.awt.event.MouseEvent e) {
-                serviceItem.setBackground(CustomUI.lightBlue);
-            }
-
-            @Override
-            public void mouseExited(java.awt.event.MouseEvent e) {
-                serviceItem.setBackground(Color.WHITE);
-            }
-        });
-
-        serviceListPanel.add(serviceItem);
-        serviceListPanel.add(Box.createVerticalStrut(5)); // Larger gap between items
+        );
+        dialog.setVisible(true);
     }
 
-    private void selectService(String serviceName, String priceStr) {
-        // Use the service dialog as parent to ensure proper modal behavior
-        Component serviceDialog = serviceSelectionPanel.getComponent(0);
-
-        String quantityStr = JOptionPane.showInputDialog(serviceDialog,
-            "Nhập số lượng cho dịch vụ: " + serviceName,
-            "Chọn số lượng",
-            JOptionPane.QUESTION_MESSAGE);
-
-        if (quantityStr != null && !quantityStr.trim().isEmpty()) {
-            try {
-                int quantity = Integer.parseInt(quantityStr.trim());
-                if (quantity > 0) {
-                    selectedServices.add(serviceName + " (x" + quantity + ")");
-                    updateTotalServiceCost();
-
-                    // Ensure service panel stays on top after dialog closes
-                    SwingUtilities.invokeLater(() -> {
-                        mainContentPanel.setComponentZOrder(serviceSelectionPanel, 0);
-                        mainContentPanel.repaint();
-                    });
-                }
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(serviceDialog, "Vui lòng nhập số hợp lệ!",
-                    "Lỗi", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-
-        // Ensure service panel stays on top after any dialog interaction
-        SwingUtilities.invokeLater(() -> {
-            mainContentPanel.setComponentZOrder(serviceSelectionPanel, 0);
-            mainContentPanel.repaint();
-        });
+    private void handleBookRoom() {
+        handleConfirmBooking();
     }
 
-    private void updateTotalServiceCost() {
-        // Simple calculation - in real implementation, you'd calculate based on actual services and quantities
-        double total = selectedServices.size() * 75000; // Sample calculation
-        lblTotalServiceCost.setText("Tổng tiền:                                        " + String.format("%.0f", total));
-    }
+    private void handleCheckOut() {
+        int result = JOptionPane.showConfirmDialog(this,
+                                                   "Xác nhận trả phòng " + selectedRoom.getRoomName() + "?",
+                                                   "Trả phòng", JOptionPane.YES_NO_OPTION);
 
-    private void confirmServiceSelection() {
-        if (!selectedServices.isEmpty()) {
+        if (result == JOptionPane.YES_OPTION) {
             JOptionPane.showMessageDialog(this,
-                "Đã chọn " + selectedServices.size() + " dịch vụ",
-                "Xác nhận", JOptionPane.INFORMATION_MESSAGE);
+                                          "Đã hoàn thành trả phòng " + selectedRoom.getRoomName(),
+                                          "Thành công", JOptionPane.INFORMATION_MESSAGE);
         }
-        toggleServicePanel(); // Close the service panel
+    }
+
+    private void handleTransferRoom() {
+        String newRoom = JOptionPane.showInputDialog(this,
+                                                     "Nhập số phòng muốn chuyển đến:",
+                                                     "Chuyển phòng", JOptionPane.QUESTION_MESSAGE);
+
+        if (newRoom != null && !newRoom.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                                          "Đã chuyển khách từ phòng " + selectedRoom.getRoomName() + " đến phòng " + newRoom,
+                                          "Thành công", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void handleExtendBooking() {
+        String[] options = {"1 giờ", "2 giờ", "3 giờ", "Tùy chỉnh"};
+        String choice = (String) JOptionPane.showInputDialog(this,
+                                                             "Chọn thời gian gia hạn:",
+                                                             "Book thêm giờ",
+                                                             JOptionPane.QUESTION_MESSAGE,
+                                                             null, options, options[0]);
+
+        if (choice != null) {
+            JOptionPane.showMessageDialog(this,
+                                          "Đã gia hạn phòng " + selectedRoom.getRoomName() + " thêm " + choice,
+                                          "Thành công", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void handleCheckIn() {
+        int result = JOptionPane.showConfirmDialog(this,
+                                                   "Xác nhận nhận phòng " + selectedRoom.getRoomName() + "?",
+                                                   "Nhận phòng", JOptionPane.YES_NO_OPTION);
+
+        if (result == JOptionPane.YES_OPTION) {
+            JOptionPane.showMessageDialog(this,
+                                          "Khách đã nhận phòng " + selectedRoom.getRoomName(),
+                                          "Thành công", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void handleCancelReservation() {
+        int result = JOptionPane.showConfirmDialog(this,
+                                                   "Xác nhận hủy đặt phòng " + selectedRoom.getRoomName() + "?",
+                                                   "Hủy đặt phòng", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+        if (result == JOptionPane.YES_OPTION) {
+            JOptionPane.showMessageDialog(this,
+                                          "Đã hủy đặt phòng " + selectedRoom.getRoomName(),
+                                          "Thành công", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void handleCancel() {
+        // Return to the previous panel
+        Main.showCard("Quản lý đặt phòng");
+    }
+
+    // TODO - Implement maintenance and cleaning handlers
+    private void handleCompleteCleaning() {
+    }
+
+    private void handleUpdateProgress() {
+    }
+
+    private void handleCompleteMaintenance() {
     }
 }

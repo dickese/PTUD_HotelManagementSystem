@@ -63,13 +63,13 @@ public class RoomDAO {
     }
 
     public Room insertRoom(Room room) {
-        String query = "INSERT INTO Room (room_name, room_status, create_date, note, room_description, room_category_id)" +
+        String query = "INSERT INTO Room (room_name, is_active, create_at, note, room_description, room_category_id)" +
                        " VALUES (?, ?, ?, ?, ?, ?)";
 
         try {
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setString(1, room.getRoomName());
-            ps.setString(2, room.getRoomStatus());
+            ps.setBoolean(2, room.isActive());
             ps.setDate(3, new java.sql.Date(room.getCreateDate().getTime()));
             ps.setString(4, room.getNote());
             ps.setString(5, room.getRoomDescription());
@@ -89,13 +89,13 @@ public class RoomDAO {
             return null;
         }
 
-        String query = "UPDATE Room SET room_name = ?, room_status = ?, create_date = ?, note = ?, " +
+        String query = "UPDATE Room SET room_name = ?, is_active = ?, create_at = ?, note = ?, " +
                        "room_description = ?, room_category_id = ? WHERE id = ?";
 
         try {
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setString(1, room.getRoomName());
-            ps.setString(2, room.getRoomStatus());
+            ps.setBoolean(2, room.isActive());
             ps.setDate(3, new java.sql.Date(room.getCreateDate().getTime()));
             ps.setString(4, room.getNote());
             ps.setString(5, room.getRoomDescription());
@@ -159,7 +159,7 @@ public class RoomDAO {
         try {
             room.setId(rs.getString("id"));
             room.setRoomName(rs.getString("roomName"));
-            room.setRoomStatus(rs.getString("roomStatus"));
+            room.setActive(rs.getBoolean("isActive"));
             room.setCreateDate(rs.getTimestamp("createDate"));
             room.setNote(rs.getString("note"));
             room.setRoomDescription(rs.getString("roomDescription"));

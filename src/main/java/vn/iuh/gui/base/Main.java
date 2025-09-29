@@ -151,7 +151,7 @@ public class Main extends JFrame {
         pnlCenter.add(blue, "Inbox");
         pnlCenter.add(tmp, "Quản lý đặt phòng");
         pnlCenter.add(pnlStatistic, "Thống kê doanh thu");
-        this.showCard("Quản lý đặt phòng");
+        showCard("Quản lý đặt phòng");
     }
 
 }

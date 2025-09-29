@@ -56,7 +56,7 @@ public class RoomServiceImpl implements RoomService {
         Room newRoom = new Room(
                 newID,
                 room.getRoomName(),
-                room.getRoomStatus(),
+                room.getIsActive(),
                 new Timestamp(new Date().getTime()),
                 room.getNote(),
                 room.getRoomDescription(),
@@ -75,7 +75,7 @@ public class RoomServiceImpl implements RoomService {
         }
 
         existingRoom.setRoomName(room.getRoomName());
-        existingRoom.setRoomStatus(existingRoom.getRoomStatus());
+        existingRoom.setActive(existingRoom.isActive());
         existingRoom.setNote(room.getNote());
         existingRoom.setRoomDescription(room.getRoomDescription());
         existingRoom.setRoomCategoryId(room.getRoomCategoryId());

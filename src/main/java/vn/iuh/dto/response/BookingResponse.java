@@ -6,6 +6,7 @@ import java.util.Objects;
 public class BookingResponse {
     private String roomId;
     private String roomName;
+    private boolean isActive;
     private String roomStatus;
     private String roomType;
     private String numberOfCustomers;
@@ -15,10 +16,11 @@ public class BookingResponse {
     private Timestamp timeIn;
     private Timestamp timeOut;
 
-    public BookingResponse(String roomId, String roomName, String roomStatus, String roomType, String numberOfCustomers,
+    public BookingResponse(String roomId, String roomName, boolean isActive, String roomStatus, String roomType, String numberOfCustomers,
                            double dailyPrice, double hourlyPrice) {
         this.roomId = roomId;
         this.roomName = roomName;
+        this.isActive = isActive;
         this.roomStatus = roomStatus;
         this.roomType = roomType;
         this.numberOfCustomers = numberOfCustomers;
@@ -66,6 +68,10 @@ public class BookingResponse {
 
     public String getRoomName() {
         return roomName;
+    }
+
+    public boolean isActive() {
+        return isActive;
     }
 
     public String getRoomStatus() {

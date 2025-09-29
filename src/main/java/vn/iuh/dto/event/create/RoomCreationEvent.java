@@ -2,15 +2,15 @@ package vn.iuh.dto.event.create;
 
 public class RoomCreationEvent {
     private final String roomName;
-    private final String roomStatus;
+    private final boolean isActive;
     private final String note;
     private final String roomDescription;
     private final String roomCategoryId;
 
-    public RoomCreationEvent(String roomName, String roomStatus, String note, String roomDescription,
+    public RoomCreationEvent(String roomName, boolean isActive, String note, String roomDescription,
                              String roomCategoryId) {
         this.roomName = roomName;
-        this.roomStatus = roomStatus;
+        this.isActive = isActive;
         this.note = note;
         this.roomDescription = roomDescription;
         this.roomCategoryId = roomCategoryId;
@@ -20,8 +20,8 @@ public class RoomCreationEvent {
         return roomName;
     }
 
-    public String getRoomStatus() {
-        return roomStatus;
+    public boolean getIsActive() {
+        return isActive;
     }
 
     public String getNote() {
@@ -35,4 +35,6 @@ public class RoomCreationEvent {
     public String getRoomCategoryId() {
         return roomCategoryId;
     }
+
+
 }
