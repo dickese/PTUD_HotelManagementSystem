@@ -37,9 +37,9 @@ public class WorkingHistoryDAO {
         return null;
     }
 
-    public WorkingHistory createWorkingHistory(WorkingHistory wh) {
-        String query = "INSERT INTO WorkingHistory (id, task_name, create_time, action_description, shift_assignment_id, account_id) "
-                + "VALUES (?, ?, ?, ?, ?, ?)";
+    public void insertWorkingHistory(WorkingHistory wh) {
+        String query = "INSERT INTO WorkingHistory (id, task_name, create_time, action_description, shift_assignment_id) "
+                + "VALUES (?, ?, ?, ?, ?)";
 
         try {
             PreparedStatement ps = connection.prepareStatement(query);
@@ -48,66 +48,30 @@ public class WorkingHistoryDAO {
             ps.setTimestamp(3, wh.getCreateTime() != null ? new Timestamp(wh.getCreateTime().getTime()) : null);
             ps.setString(4, wh.getActionDescription());
             ps.setString(5, wh.getShiftAssignmentId());
-            ps.setString(6, wh.getAccountId());
 
             ps.executeUpdate();
-            return wh;
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-
-        return null;
     }
 
-    public WorkingHistory updateWorkingHistory(WorkingHistory wh) {
-        String query = "UPDATE WorkingHistory SET task_name = ?, create_time = ?, action_description = ?, " +
-                "shift_assignment_id = ?, account_id = ?, create_at = ? " +
-                "WHERE id = ? AND is_deleted = 0";
+    public WorkingHistory findLastWorkingHistory() {
+        String query = "SELECT TOP 1 * FROM WorkingHistory ORDER BY id DESC";
 
         try {
             PreparedStatement ps = connection.prepareStatement(query);
-            ps.setString(1, wh.getTaskName());
-            ps.setTimestamp(2, wh.getCreateTime() != null ? new Timestamp(wh.getCreateTime().getTime()) : null);
-            ps.setString(3, wh.getActionDescription());
-            ps.setString(4, wh.getShiftAssignmentId());
-            ps.setString(5, wh.getAccountId());
-            ps.setTimestamp(6, wh.getCreateAt() != null ? new Timestamp(wh.getCreateAt().getTime()) : null);
-            ps.setString(7, wh.getId());
 
-            int rowsAffected = ps.executeUpdate();
-            if (rowsAffected > 0) {
-                return getWorkingHistoryByID(wh.getId());
-            } else {
-                System.out.println("No working history found with ID: " + wh.getId());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return mapResultSetToWorkingHistory(rs);
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException(e);
+        } catch (TableEntityMismatch et) {
+            System.out.println(et.getMessage());
         }
 
         return null;
-    }
-
-    public boolean deleteWorkingHistoryByID(String id) {
-        if (getWorkingHistoryByID(id) == null) {
-            System.out.println("No working history found with ID: " + id);
-            return false;
-        }
-
-        String query = "UPDATE WorkingHistory SET is_deleted = 1 WHERE id = ?";
-
-        try {
-            PreparedStatement ps = connection.prepareStatement(query);
-            ps.setString(1, id);
-            int rowsAffected = ps.executeUpdate();
-            if (rowsAffected > 0) {
-                System.out.println("Working history has been deleted successfully");
-                return true;
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-
-        return false;
     }
 
     private WorkingHistory mapResultSetToWorkingHistory(ResultSet rs) throws SQLException {
@@ -118,9 +82,6 @@ public class WorkingHistoryDAO {
             wh.setCreateTime(rs.getTimestamp("create_time"));
             wh.setActionDescription(rs.getString("action_description"));
             wh.setShiftAssignmentId(rs.getString("shift_assignment_id"));
-            wh.setAccountId(rs.getString("account_id"));
-            wh.setCreateAt(rs.getTimestamp("create_at"));
-            wh.setIsDeleted(rs.getInt("is_deleted"));
             return wh;
         } catch (SQLException e) {
             throw new TableEntityMismatch("Can't map ResultSet to WorkingHistory: " + e);

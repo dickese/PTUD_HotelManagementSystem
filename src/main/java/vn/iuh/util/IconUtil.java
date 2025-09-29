@@ -17,7 +17,7 @@ public class IconUtil {
 
     public static ImageIcon createBookingIcon() {
         try {
-            ImageIcon icon = new ImageIcon(Objects.requireNonNull(IconUtil.class.getResource("/icons/booking.png")));
+            ImageIcon icon = new ImageIcon(Objects.requireNonNull(IconUtil.class.getResource("/icons/reservation.png")));
             return new ImageIcon(icon.getImage().getScaledInstance(128, 128, Image.SCALE_SMOOTH));
         } catch (Exception e) {
             return createColoredIcon(new Color(76, 175, 80), "🏨"); // Green for booking

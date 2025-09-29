@@ -4,7 +4,7 @@ public class RoomInfo {
     private final String id;
     private final String roomName;
     private boolean isActive;
-    private final String roomStatus;
+    private String roomStatus;
     private final String roomType;
     private final String numberOfCustomers;
     private final double dailyPrice;
@@ -36,6 +36,10 @@ public class RoomInfo {
 
     public String getRoomStatus() {
         return roomStatus;
+    }
+
+    public void setRoomStatus(String roomStatus) {
+        this.roomStatus = roomStatus;
     }
 
     public String getRoomType() {

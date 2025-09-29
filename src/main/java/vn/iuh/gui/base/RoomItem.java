@@ -1,5 +1,6 @@
 package vn.iuh.gui.base;
 
+import vn.iuh.constraint.RoomStatus;
 import vn.iuh.dto.response.BookingResponse;
 import vn.iuh.gui.panel.BookingFormPanel;
 
@@ -7,6 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.util.Objects;
 
 public class RoomItem extends JPanel {
@@ -148,28 +150,48 @@ public class RoomItem extends JPanel {
     }
 
     private String getIconPathForStatus(String status) {
-        return switch (status) {
-            case "còn trống", "đang hoạt động" -> "/icons/checked.png";
-            case "đang sử dụng" -> "/icons/checkin.png";
-            case "đặt trước" -> "/icons/calendar.png";
-            case "đang kiểm tra" -> "/icons/room.png";
-            case "trả phòng trễ" -> "/icons/error.png";
-            case "bảo trì" -> "/icons/transfer.png";
-            case "dọn dẹp" -> "/icons/room.png";
-            default -> "/icons/available.png";
+
+        RoomStatus roomStatus = null;
+        try {
+            roomStatus = RoomStatus.fromString(status);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Unknown room status: " + status);
+        }
+
+        if (Objects.isNull(roomStatus)) {
+            roomStatus = RoomStatus.ROOM_AVAILABLE_STATUS; // Default to available if unknown
+        }
+
+        return switch (roomStatus) {
+            case ROOM_AVAILABLE_STATUS -> "/icons/checked.png";
+            case ROOM_USING_STATUS -> "/icons/checkin.png";
+            case ROOM_BOOKED_STATUS -> "/icons/calendar.png";
+            case ROOM_CHECKING_STATUS -> "/icons/room.png";
+            case ROOM_CHECKOUT_LATE_STATUS -> "/icons/error.png";
+            case ROOM_MAINTENANCE_STATUS -> "/icons/transfer.png";
+            case ROOM_CLEANING_STATUS -> "/icons/room.png";
         };
     }
 
     private ImageIcon createFallbackStatusIcon(String status) {
-        String emoji = switch (status) {
-            case "còn trống", "đang hoạt động" -> "✅";
-            case "đang sử dụng" -> "🔑";
-            case "đặt trước" -> "📅";
-            case "đang kiểm tra" -> "🔍";
-            case "trả phòng trễ" -> "⚠️";
-            case "bảo trì" -> "🔧";
-            case "dọn dẹp" -> "🧹";
-            default -> "🏨";
+
+        RoomStatus roomStatus;
+        try {
+            roomStatus = RoomStatus.valueOf(status.toUpperCase().replace(" ", "_"));
+        } catch (IllegalArgumentException e) {
+            System.out.println("Unknown room status: " + status);
+            roomStatus = RoomStatus.ROOM_AVAILABLE_STATUS; // Default to available if unknown
+        }
+
+
+        String emoji = switch (roomStatus) {
+            case ROOM_AVAILABLE_STATUS -> "✅";
+            case ROOM_USING_STATUS -> "🏠";
+            case ROOM_BOOKED_STATUS -> "📅";
+            case ROOM_CHECKING_STATUS -> "🛏️";
+            case ROOM_CHECKOUT_LATE_STATUS -> "⚠️";
+            case ROOM_MAINTENANCE_STATUS -> "🔧";
+            case ROOM_CLEANING_STATUS -> "🧹";
         };
 
         return createColoredIcon(Color.WHITE, emoji, 24);
@@ -177,7 +199,7 @@ public class RoomItem extends JPanel {
 
     // Helper method to create colored icons with emoji text when image files are not available
     private ImageIcon createColoredIcon(Color textColor, String emoji, int size) {
-        java.awt.image.BufferedImage image = new java.awt.image.BufferedImage(size, size, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = image.createGraphics();
 
         // Enable anti-aliasing for smooth rendering
@@ -291,7 +313,7 @@ public class RoomItem extends JPanel {
 
     private JPanel createOccupiedRoomPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(new Color(173, 216, 230)); // Light blue background
+        panel.setBackground(new Color(17, 216, 230)); // Light blue background
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 10, 5, 10);

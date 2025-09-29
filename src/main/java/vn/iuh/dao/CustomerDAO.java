@@ -21,7 +21,7 @@ public class CustomerDAO {
     }
 
     public Customer getCustomerByID(String id) {
-        String query = "SELECT * FROM Customer WHERE id = ? AND is_deleted = false";
+        String query = "SELECT * FROM Customer WHERE id = ? AND is_deleted = 0";
 
         try {
             PreparedStatement ps = connection.prepareStatement(query);
@@ -40,9 +40,48 @@ public class CustomerDAO {
         return null;
     }
 
+    public Customer findCustomerByCCCD(String cccd) {
+        String query = "SELECT * FROM Customer WHERE CCCD = ? AND is_deleted = 0";
+
+        try {
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setString(1, cccd);
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return mapResultSetToCustomer(rs);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (TableEntityMismatch et) {
+            System.out.println(et.getMessage());
+        }
+
+        return null;
+    }
+
+    public Customer findLastCustomer() {
+        String query = "SELECT TOP 1 * FROM Customer WHERE is_deleted = 0 ORDER BY id DESC";
+
+        try {
+            PreparedStatement ps = connection.prepareStatement(query);
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return mapResultSetToCustomer(rs);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (TableEntityMismatch et) {
+            System.out.println(et.getMessage());
+        }
+
+        return null;
+    }
+
     public Customer createCustomer(Customer customer) {
         String query = "INSERT INTO Customer (id, customer_name, phone_number, CCCD, is_deleted) " +
-                "VALUES (?, ?, ?, ?, false)";
+                "VALUES (?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = connection.prepareStatement(query)) {
             ps.setString(1, customer.getId());

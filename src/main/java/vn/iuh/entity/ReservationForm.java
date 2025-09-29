@@ -14,32 +14,13 @@ public class ReservationForm {
     private boolean isAdvanced;
     private String customerId;
     private String shiftAssignmentId;
-    private Timestamp createAt;
-
-    public Timestamp getCreateAt() {
-        return createAt;
-    }
-
-    public void setCreateAt(Timestamp createAt) {
-        this.createAt = createAt;
-    }
-
-    public boolean isDeleted() {
-        return isDeleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
-    }
-
-    private boolean isDeleted;
 
     public ReservationForm() {
     }
 
     public ReservationForm(String id, Timestamp reserveDate, String note, Timestamp checkInDate, Timestamp checkOutDate,
                            double initialPrice, double depositPrice, boolean isAdvanced, String customerId,
-                           String shiftAssignmentId, Timestamp createAt, boolean isDeleted) {
+                           String shiftAssignmentId) {
         this.id = id;
         this.reserveDate = reserveDate;
         this.note = note;
@@ -50,8 +31,6 @@ public class ReservationForm {
         this.isAdvanced = isAdvanced;
         this.customerId = customerId;
         this.shiftAssignmentId = shiftAssignmentId;
-        this.createAt = createAt;
-        this.isDeleted = isDeleted;
     }
 
     // Getters and Setters

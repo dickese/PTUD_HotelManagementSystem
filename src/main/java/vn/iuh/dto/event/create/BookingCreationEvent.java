@@ -20,11 +20,10 @@ public class BookingCreationEvent {
     private List<String> serviceIds;
     private String shiftAssignmentId;
     private Timestamp createAt;
-    private boolean isDeleted;
     public BookingCreationEvent(String customerName, String phoneNumber, String CCCD, Timestamp reserveDate, String note,
                                 Timestamp checkInDate, Timestamp checkOutDate, double initialPrice, double depositPrice,
                                 boolean isAdvanced, List<String> roomIds, List<String> serviceIds,
-                                String shiftAssignmentId, Timestamp createAt, boolean isDeleted) {
+                                String shiftAssignmentId, Timestamp createAt) {
         this.customerName = customerName;
         this.phoneNumber = phoneNumber;
         this.CCCD = CCCD;
@@ -39,7 +38,6 @@ public class BookingCreationEvent {
         this.serviceIds = serviceIds;
         this.shiftAssignmentId = shiftAssignmentId;
         this.createAt = createAt;
-        this.isDeleted = isDeleted;
     }
 
     public String getCustomerName() {
@@ -95,6 +93,4 @@ public class BookingCreationEvent {
     }
 
     public Timestamp getCreateAt() { return createAt; }
-
-    public boolean getIsDeleTed() { return isDeleted; }
 }

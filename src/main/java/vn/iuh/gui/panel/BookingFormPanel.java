@@ -1,6 +1,7 @@
 package vn.iuh.gui.panel;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import vn.iuh.constraint.RoomStatus;
 import vn.iuh.dto.event.create.BookingCreationEvent;
 import vn.iuh.dto.response.BookingResponse;
 import vn.iuh.gui.base.CustomUI;
@@ -537,34 +538,31 @@ public class BookingFormPanel extends JPanel {
         ActionItem transferRoomItem = new ActionItem("Chuyển Phòng", IconUtil.createTransferIcon(), CustomUI.bluePurple, this::handleTransferRoom);
         ActionItem extendBookingItem = new ActionItem("Book Thêm Giờ", IconUtil.createExtendIcon(), CustomUI.bluePurple, this::handleExtendBooking);
         ActionItem cancelReservationItem = new ActionItem("Hủy Đặt Phòng", IconUtil.createCancelIcon(), CustomUI.red, this::handleCancelReservation);
-
         ActionItem checkInItem = new ActionItem("Nhận Phòng", IconUtil.createCheckInIcon(), CustomUI.bluePurple, this::handleCheckIn);
-        if ("Còn Trống".equalsIgnoreCase(roomStatus) || "Đang hoạt động".equalsIgnoreCase(roomStatus)) {
+
+        if (roomStatus.equals(RoomStatus.ROOM_AVAILABLE_STATUS.getStatus())) {
             items.add(callServiceItem);
             items.add(bookRoomItem);
         }
-        else if ("Đang sử dụng".equalsIgnoreCase(roomStatus)) {
+        else if (roomStatus.equals(RoomStatus.ROOM_USING_STATUS.getStatus())) {
             items.add(callServiceItem);
             items.add(checkOutItem);
             items.add(transferRoomItem);
             items.add(extendBookingItem);
         }
-        else if ("Bảo trì".equalsIgnoreCase(roomStatus) || "Maintenance".equalsIgnoreCase(roomStatus)) {
+        else if (roomStatus.equals(RoomStatus.ROOM_MAINTENANCE_STATUS.getStatus())) {
             items.add(new ActionItem("Hoàn Thành Bảo Trì", IconUtil.createCompleteIcon(), CustomUI.lightBlue, this::handleCompleteMaintenance));
             items.add(new ActionItem("Cập Nhật Tiến Độ", IconUtil.createProgressIcon(), CustomUI.lightBlue, this::handleUpdateProgress));
         }
-        else if ("Dọn dẹp".equalsIgnoreCase(roomStatus) || "Cleaning".equalsIgnoreCase(roomStatus)) {
+        else if (roomStatus.equals(RoomStatus.ROOM_CLEANING_STATUS.getStatus())) {
             items.add(new ActionItem("Hoàn Thành Dọn Dẹp", IconUtil.createCompleteIcon(), CustomUI.lightBlue, this::handleCompleteCleaning));
         }
-        else if ("Đã đặt".equalsIgnoreCase(roomStatus) || "Reserved".equalsIgnoreCase(roomStatus)) {
+        else if (roomStatus.equals(RoomStatus.ROOM_BOOKED_STATUS.getStatus())) {
             items.add(checkInItem);
             items.add(cancelReservationItem);
-//            items.add(new ActionItem("Sửa Đặt Phòng", createEditIcon(), CustomUI.lightBlue, this::handleEditReservation));
         } else {
             items.add(callServiceItem);
-            items.add(checkOutItem);
-            items.add(transferRoomItem);
-            items.add(extendBookingItem);
+            items.add(bookRoomItem);
         }
 
         return items;
@@ -849,6 +847,7 @@ public class BookingFormPanel extends JPanel {
             }
 
         } catch (Exception e) {
+            System.out.println("Error during booking: " + e.getMessage());
             JOptionPane.showMessageDialog(this, "Lỗi khi đặt phòng: " + e.getMessage(),
                 "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
@@ -912,11 +911,11 @@ public class BookingFormPanel extends JPanel {
         boolean isAdvanced = chkIsAdvanced.isSelected();
         java.util.List<String> roomIds = java.util.Arrays.asList(selectedRoom.getRoomId());
         java.util.List<String> serviceIds = java.util.Arrays.asList(); // Empty for now
-        String shiftAssignmentId = "SA0000001"; // TODO - get actual shift assignment ID
+        String shiftAssignmentId = "SA00000002"; // TODO - get actual shift assignment ID
 
         return new BookingCreationEvent(customerName, phoneNumber, cccd, reserveDate, note,
                 checkInDate, checkOutDate, initialPrice, depositPrice, isAdvanced,
-                roomIds, serviceIds, shiftAssignmentId, createAt, false);
+                roomIds, serviceIds, shiftAssignmentId, createAt);
     }
 
     // Setup event handlers for buttons

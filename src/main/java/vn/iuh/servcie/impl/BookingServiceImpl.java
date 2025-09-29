@@ -1,8 +1,12 @@
 package vn.iuh.servcie.impl;
 
+import vn.iuh.constraint.ActionType;
 import vn.iuh.constraint.EntityIDSymbol;
 import vn.iuh.constraint.RoomStatus;
 import vn.iuh.dao.BookingDAO;
+import vn.iuh.dao.CustomerDAO;
+import vn.iuh.dao.JobDAO;
+import vn.iuh.dao.WorkingHistoryDAO;
 import vn.iuh.dto.event.create.BookingCreationEvent;
 import vn.iuh.dto.event.create.RoomFilter;
 import vn.iuh.dto.repository.BookingInfo;
@@ -13,30 +17,49 @@ import vn.iuh.servcie.BookingService;
 import vn.iuh.util.EntityUtil;
 
 import java.sql.Date;
-import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class BookingServiceImpl implements BookingService {
     private final BookingDAO bookingDAO;
+    private final CustomerDAO customerDAO;
+    private final WorkingHistoryDAO workingHistoryDAO;
+    private final JobDAO jobDAO;
 
     public BookingServiceImpl() {
         this.bookingDAO = new BookingDAO();
+        this.customerDAO = new CustomerDAO();
+        this.workingHistoryDAO = new WorkingHistoryDAO();
+        this.jobDAO = new JobDAO();
     }
 
     @Override
     public boolean createBooking(BookingCreationEvent bookingCreationEvent) {
-        // TODO find customer by CCCD or Phone number
-        Customer customer = null;
 
-        bookingDAO.beginTransaction();
+        // 1. find Customer by CCCD
+        Customer customer = customerDAO.findCustomerByCCCD(bookingCreationEvent.getCCCD());
+
         try {
-            // 1. Create ReservationFormEntity & insert to DB
+            bookingDAO.beginTransaction();
+
+            // 1.1 Create Customer if not exist
+            if (Objects.isNull(customer)) {
+                customerDAO.createCustomer(new Customer(
+                        EntityUtil.increaseEntityID(null,
+                                                    EntityIDSymbol.CUSTOMER_PREFIX.getPrefix(),
+                                                    EntityIDSymbol.CUSTOMER_PREFIX.getLength()),
+                        bookingCreationEvent.getCustomerName(),
+                        bookingCreationEvent.getPhoneNumber(),
+                        bookingCreationEvent.getCCCD()));
+            }
+
+            // 2.1. Create ReservationFormEntity & insert to DB
             ReservationForm reservationForm = createReservationFormEntity(bookingCreationEvent, null);
             bookingDAO.insertReservationForm(reservationForm);
 
-            // 2. Create RoomReservationDetail Entity & insert to DB
+            // 2.2. Create RoomReservationDetail Entity & insert to DB
             List<RoomReservationDetail> roomReservationDetails = new ArrayList<>();
             for (String roomId : bookingCreationEvent.getRoomIds())
                 roomReservationDetails.add(
@@ -44,7 +67,7 @@ public class BookingServiceImpl implements BookingService {
 
             bookingDAO.insertRoomReservationDetail(reservationForm, roomReservationDetails);
 
-            // 3. Create HistoryCheckInEntity & insert to DB
+            // 2.3. Create HistoryCheckInEntity & insert to DB
             List<HistoryCheckIn> historyCheckIns = new ArrayList<>();
             for (RoomReservationDetail roomReservationDetail : roomReservationDetails) {
                 historyCheckIns.add(createHistoryCheckInEntity(roomReservationDetail));
@@ -52,7 +75,7 @@ public class BookingServiceImpl implements BookingService {
 
             bookingDAO.insertHistoryCheckIn(reservationForm, historyCheckIns);
 
-            // 4. Create RoomUsageServiceEntity & insert to DB
+            // 2.4. Create RoomUsageServiceEntity & insert to DB
             List<RoomUsageService> roomUsageServices = new ArrayList<>();
             for (String serviceId : bookingCreationEvent.getServiceIds())
                 roomUsageServices.add(
@@ -60,9 +83,44 @@ public class BookingServiceImpl implements BookingService {
 
             bookingDAO.insertRoomUsageService(reservationForm, roomUsageServices);
 
-            // 5. Update Room Status
-            for (String roomId : bookingCreationEvent.getRoomIds())
-                bookingDAO.updateRoomStatus(roomId, RoomStatus.ROOM_CHECKING_STATUS.getStatus());
+            // 2.5. Create Job for each booked room
+            List<Job> jobs = new ArrayList<>();
+            Job job = jobDAO.findLastJob();
+            String jobId = job == null ? null : job.getId();
+            for (String roomId : bookingCreationEvent.getRoomIds()) {
+                String newId = EntityUtil.increaseEntityID(jobId,
+                                                           EntityIDSymbol.JOB_PREFIX.getPrefix(),
+                                                           EntityIDSymbol.JOB_PREFIX.getLength());
+
+                String statusName = bookingCreationEvent.isAdvanced()
+                        ? RoomStatus.ROOM_BOOKED_STATUS.getStatus()
+                        : RoomStatus.ROOM_USING_STATUS.getStatus();
+
+                jobs.add(new Job(newId,
+                                 bookingCreationEvent.getCheckInDate(),
+                                 bookingCreationEvent.getCheckOutDate(),
+                                 statusName,
+                                 roomId));
+                jobId = newId;
+            }
+
+            jobDAO.insertJobs(jobs);
+
+            // 2.6. Update WorkingHistory
+            WorkingHistory lastWorkingHistory = workingHistoryDAO.findLastWorkingHistory();
+            String workingHistoryId = lastWorkingHistory == null ? null : lastWorkingHistory.getId();
+
+            String actionDescription = "Đặt phòng cho khách hàng " + bookingCreationEvent.getCustomerName()
+                                       + " - CCCD: " + bookingCreationEvent.getCCCD() + "Phòng: " + bookingCreationEvent.getRoomIds().toString();
+            workingHistoryDAO.insertWorkingHistory(new WorkingHistory(
+                    EntityUtil.increaseEntityID(workingHistoryId,
+                                                EntityIDSymbol.WORKING_HISTORY_PREFIX.getPrefix(),
+                                                EntityIDSymbol.WORKING_HISTORY_PREFIX.getLength()),
+                    ActionType.BOOKING.getActionName(),
+                    new Timestamp(System.currentTimeMillis()),
+                    actionDescription,
+                    bookingCreationEvent.getShiftAssignmentId()
+            ));
 
         } catch (Exception e) {
             System.out.println("Lỗi khi đặt phòng: " + e.getMessage());
@@ -105,6 +163,15 @@ public class BookingServiceImpl implements BookingService {
         // Create BookingResponse each Room info
         List<BookingResponse> bookingResponses = new ArrayList<>();
         for (RoomInfo roomInfo : roomInfos) {
+
+            // Set default Room Status if null or empty
+            if (Objects.isNull(roomInfo.getRoomStatus()) || roomInfo.getRoomStatus().isEmpty()) {
+                roomInfo.setRoomStatus(roomInfo.isActive()
+                                               ? RoomStatus.ROOM_AVAILABLE_STATUS.getStatus()
+                                               : RoomStatus.ROOM_MAINTENANCE_STATUS.getStatus()
+                );
+            }
+
             if (Objects.equals(roomInfo.getRoomStatus(), RoomStatus.ROOM_BOOKED_STATUS.getStatus()) ||
                 Objects.equals(roomInfo.getRoomStatus(), RoomStatus.ROOM_CHECKING_STATUS.getStatus()) ||
                 Objects.equals(roomInfo.getRoomStatus(), RoomStatus.ROOM_USING_STATUS.getStatus()) ||
@@ -158,9 +225,7 @@ public class BookingServiceImpl implements BookingService {
                 bookingCreationEvent.getDepositPrice(),
                 bookingCreationEvent.isAdvanced(),
                 customerId,
-                bookingCreationEvent.getShiftAssignmentId(),
-                bookingCreationEvent.getCreateAt(),
-                bookingCreationEvent.getIsDeleTed()
+                bookingCreationEvent.getShiftAssignmentId()
         );
     }
 

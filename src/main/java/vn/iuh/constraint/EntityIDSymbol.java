@@ -7,7 +7,10 @@ public enum EntityIDSymbol {
     HISTORY_CHECKIN_PREFIX("HI",8),
     ROOM_USAGE_SERVICE_PREFIX("RS",8),
     ACCOUNT_PREFIX("AC", 8),
-    AdditionalFee_PREFIX("AF", 8);
+    AdditionalFee_PREFIX("AF", 8),
+    CUSTOMER_PREFIX("CU", 8),
+    JOB_PREFIX("JO", 8),
+    WORKING_HISTORY_PREFIX("WH", 8);
 //................... Other here
 
 

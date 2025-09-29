@@ -9,23 +9,17 @@ public class WorkingHistory {
     private Timestamp createTime;
     private String actionDescription;
     private String shiftAssignmentId;
-    private String accountId;
-    private Timestamp createAt;
-    private int isDeleted;
 
     public WorkingHistory() {
     }
 
     public WorkingHistory(String id, String taskName, Timestamp createTime, String actionDescription,
-                          String shiftAssignmentId, String accountId, Timestamp createAt, int isDeleted) {
+                          String shiftAssignmentId) {
         this.id = id;
         this.taskName = taskName;
         this.createTime = createTime;
         this.actionDescription = actionDescription;
         this.shiftAssignmentId = shiftAssignmentId;
-        this.accountId = accountId;
-        this.createAt = createAt;
-        this.isDeleted = isDeleted;
     }
 
     // Getters and Setters
@@ -68,20 +62,4 @@ public class WorkingHistory {
     public void setShiftAssignmentId(String shiftAssignmentId) {
         this.shiftAssignmentId = shiftAssignmentId;
     }
-
-    public String getAccountId() {
-        return accountId;
-    }
-
-    public void setAccountId(String accountId) {
-        this.accountId = accountId;
-    }
-
-    public Timestamp getCreateAt() { return createAt; }
-
-    public void setCreateAt(Timestamp createAt) { this.createAt = createAt; }
-
-    public int getIsDeleted() { return isDeleted; }
-
-    public void setIsDeleted(int isDeleted) { this.isDeleted = isDeleted; }
 }

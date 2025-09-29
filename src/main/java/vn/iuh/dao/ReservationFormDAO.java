@@ -67,7 +67,7 @@ public class ReservationFormDAO {
 
     public ReservationForm updateReservationForm(ReservationForm reservationForm) {
         String query = "UPDATE ReservationForm SET reserve_date = ?, note = ?, check_in_date = ?, check_out_date = ?, " +
-                "initial_price = ?, deposit_price = ?, is_advanced = ?, customer_id = ?, shift_assignment_id = ?, create_at = ? " +
+                "initial_price = ?, deposit_price = ?, is_advanced = ?, customer_id = ?, shift_assignment_id = ?" +
                 "WHERE id = ? AND is_deleted = 0";
 
         try {
@@ -81,8 +81,7 @@ public class ReservationFormDAO {
             ps.setBoolean(7, reservationForm.getIsAdvanced());
             ps.setString(8, reservationForm.getCustomerId());
             ps.setString(9, reservationForm.getShiftAssignmentId());
-            ps.setTimestamp(10, reservationForm.getCreateAt() != null ? new Timestamp(reservationForm.getCreateAt().getTime()) : null);
-            ps.setString(11, reservationForm.getId());
+            ps.setString(10, reservationForm.getId());
 
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected > 0) {
@@ -133,8 +132,6 @@ public class ReservationFormDAO {
             reservationForm.setIsAdvanced(rs.getBoolean("is_advanced"));
             reservationForm.setCustomerId(rs.getString("customer_id"));
             reservationForm.setShiftAssignmentId(rs.getString("shift_assignment_id"));
-            reservationForm.setCreateAt(rs.getTimestamp("create_at"));
-            reservationForm.setDeleted(rs.getBoolean("is_deleted"));
             return reservationForm;
         } catch (SQLException e) {
             throw new TableEntityMismatch("Can't map ResultSet to ReservationForm: " + e);

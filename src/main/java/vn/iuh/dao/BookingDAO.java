@@ -111,7 +111,7 @@ public class BookingDAO {
     public boolean insertReservationForm(ReservationForm reservationFormEntity) {
         String query = "INSERT INTO ReservationForm" +
                        " (id, reserve_date, note, check_in_date, check_out_date, initial_price" +
-                       ", deposite_price, is_advanced, customer_id, shift_assignment_id)" +
+                       ", deposit_price, is_advanced, customer_id, shift_assignment_id)" +
                        " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
@@ -245,9 +245,10 @@ public class BookingDAO {
     }
 
     public List<RoomInfo> findAllRoomInfo() {
-        String query = "SELECT r.id, r.room_name, r.is_active, rc.room_type, rc.number_customer" +
+        String query = "SELECT r.id, r.room_name, r.is_active, j.status_name, rc.room_type, rc.number_customer" +
                        ", rlp.updated_daily_price, rlp.updated_hourly_price" +
                        " FROM Room r" +
+                       " LEFT JOIN Job j ON j.room_id = r.id" +
                        " JOIN RoomCategory rc ON rc.id = r.room_category_id" +
                        " JOIN RoomListPrice rlp ON rlp.room_category_id = rc.id" +
                        " WHERE r.is_deleted = 0" +
@@ -313,7 +314,7 @@ public class BookingDAO {
     }
 
     public ReservationForm findLastReservationForm() {
-        String query = "SELECT TOP 1 * FROM ReservationForm ORDER BY create_at DESC";
+        String query = "SELECT TOP 1 * FROM ReservationForm ORDER BY id DESC";
 
         try {
             PreparedStatement ps = connection.prepareStatement(query);
@@ -333,7 +334,7 @@ public class BookingDAO {
     }
 
     public RoomReservationDetail findLastRoomReservationDetail() {
-        String query = "SELECT TOP 1 * FROM RoomReservationDetail ORDER BY create_at DESC";
+        String query = "SELECT TOP 1 * FROM RoomReservationDetail ORDER BY id DESC";
 
         try {
             PreparedStatement ps = connection.prepareStatement(query);
@@ -353,7 +354,7 @@ public class BookingDAO {
     }
 
     public HistoryCheckIn findLastHistoryCheckIn() {
-        String query = "SELECT TOP 1 * FROM HistoryCheckIn ORDER BY is_first DESC";
+        String query = "SELECT TOP 1 * FROM HistoryCheckIn ORDER BY id DESC";
 
         try {
             PreparedStatement ps = connection.prepareStatement(query);
@@ -370,7 +371,7 @@ public class BookingDAO {
     }
 
     public RoomUsageService findLastRoomUsageService() {
-        String query = "SELECT TOP 1 * FROM RoomUsageService ORDER BY create_at DESC";
+        String query = "SELECT TOP 1 * FROM RoomUsageService ORDER BY id DESC";
 
         try {
             PreparedStatement ps = connection.prepareStatement(query);
@@ -411,7 +412,7 @@ public class BookingDAO {
                     rs.getString("id"),
                     rs.getString("room_name"),
                     rs.getBoolean("is_active"),
-                    rs.getString("is_active"),
+                    rs.getString("status_name"),
                     rs.getString("room_type"),
                     rs.getString("number_customer"),
                     rs.getDouble("updated_daily_price"),
@@ -446,9 +447,7 @@ public class BookingDAO {
                     rs.getDouble("deposit_price"),
                     rs.getBoolean("is_advanced"),
                     rs.getString("customer_id"),
-                    rs.getString("shift_assignment_id"),
-                    rs.getTimestamp("create_at"),
-                    rs.getBoolean("is_deleted")
+                    rs.getString("shift_assignment_id")
             );
         } catch (SQLException e) {
             throw new TableEntityMismatch("Can`t map ResultSet to ReservationForm" + e.getMessage());

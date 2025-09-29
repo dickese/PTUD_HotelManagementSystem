@@ -7,7 +7,7 @@ public class EntityUtil {
             return prefix + String.format(format, 1);
         }
 
-        String[] strings = entityID.split(prefix);
+        String[] strings = entityID.trim().split(prefix);
         int id = Integer.parseInt(strings[1].trim());
         id++;
 

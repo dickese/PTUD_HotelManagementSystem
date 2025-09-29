@@ -128,7 +128,7 @@ public class RevenueStatisticPanel extends JPanel {
         pnlVisualDisplay = new JPanel();
         cardLayout = new CardLayout();
         pnlVisualDisplay.setLayout(cardLayout);
-        pnlVisualDisplay.add(scrollTable, "table");
+//        pnlVisualDisplay.add(scrollTable, "table");
     }
 
     private void createTableResult(){
